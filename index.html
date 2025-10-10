@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <title id="page-title">谷比算力 - 专业区块链策略开发与量化交易服务</title>
+    <meta name="keywords" id="page-keywords" content="区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易">
+    <meta name="description" id="page-description" content="我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入语言切换组件 -->
+    <script src="lang.js"></script>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- 网站配置加载脚本 -->
+    <script>
+        // 加载网站配置
+        function loadSiteConfig() {
+            console.log('开始加载网站配置...');
+            fetch('/api/site-config')
+                .then(response => {
+                    console.log('配置请求响应状态:', response.status, response.ok);
+                    if (!response.ok) {
+                        throw new Error('网络响应错误');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('获取到原始响应数据:', data);
+                    const config = data.config || {};
+                    console.log('提取的配置对象:', config);
+                    // 更新网站名称
+                    if (config.siteName) {
+                        const siteNameElement = document.getElementById('siteName');
+                        if (siteNameElement) {
+                            siteNameElement.textContent = config.siteName;
+                        }
+                        
+                        const pageTitleElement = document.getElementById('page-title');
+                        if (pageTitleElement) {
+                            const originalTitle = pageTitleElement.textContent;
+                            const titleParts = originalTitle.split(' - ');
+                            if (titleParts.length > 1) {
+                                pageTitleElement.textContent = config.siteName + ' - ' + titleParts[1];
+                            }
+                        }
+                    }
+                    
+                    // 更新logo
+                    if (config.logo) {
+                        const logoElement = document.getElementById('siteLogo');
+                        if (logoElement) {
+                            logoElement.src = config.logo;
+                        }
+                    }
+                    
+                    // 更新meta标签
+                    if (config.keywords) {
+                        const keywordsElement = document.getElementById('page-keywords');
+                        if (keywordsElement) {
+                            keywordsElement.content = config.keywords;
+                        }
+                    }
+                    
+                    if (config.description) {
+                        const descriptionElement = document.getElementById('page-description');
+                        if (descriptionElement) {
+                            descriptionElement.content = config.description;
+                        }
+                    }
+                    
+                    // 更新社交媒体链接
+                    if (config.telegramLink) {
+                        const telegramLink1 = document.getElementById('telegramLink1');
+                        if (telegramLink1) {
+                            telegramLink1.href = config.telegramLink;
+                        }
+                        
+                        const telegramLink2 = document.getElementById('telegramLink2');
+                        if (telegramLink2) {
+                            telegramLink2.href = config.telegramLink;
+                        }
+                    }
+                    
+                    if (config.xLink) {
+                        // 可以在这里添加X链接的处理逻辑
+                        console.log('X链接:', config.xLink);
+                    }
+                })
+                .catch(error => {
+                    console.error('加载网站配置失败:', error);
+                });
+        }
+        
+        // 页面加载时获取配置
+        document.addEventListener('DOMContentLoaded', loadSiteConfig);
+    </script>
+    <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#111827',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+</head>
+<body class="font-inter bg-light text-dark antialiased">
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo -->
+                <div class="flex items-center space-x-2">
+                    <img src="img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto" id="siteLogo">
+                    <span class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name" id="siteName">谷比算力</span>
+                </div>
+                
+                <!-- 桌面端导航 -->
+                  <nav class="hidden md:flex items-center space-x-8">
+                      <a href="#features" class="text-gray-600 hover:text-primary font-medium transition-colors" data-lang-key="nav.features">核心优势</a>
+                      <a href="#services" class="text-gray-600 hover:text-primary font-medium transition-colors" data-lang-key="nav.services">服务内容</a>
+                      <a href="#exchanges" class="text-gray-600 hover:text-primary font-medium transition-colors" data-lang-key="nav.exchanges">交易所分析</a>
+                      <a href="#articles" class="text-gray-600 hover:text-primary font-medium transition-colors" data-lang-key="nav.articles">最新资讯</a>
+                  </nav>
+                
+                <!-- 操作按钮 -->
+                <div class="flex items-center space-x-4">
+                    <a href="https://t.me/mevjk_bot" target="_blank" class="hidden md:block px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 font-medium transition-all-300 shadow-md hover:shadow-lg" data-lang-key="btn.start" id="telegramLink1">
+                        立即开始
+                    </a>
+                    <button class="md:hidden px-2 py-1 border border-primary/50 text-primary rounded-md hover:bg-primary/5 transition-colors" data-lang-switch>
+                        <span data-lang-btn-text>EN</span>
+                    </button>
+
+                    <button class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 font-medium transition-all-300" data-lang-switch>
+                        <span data-lang-btn-text>EN</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 首屏 -->
+    <section class="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 z-0"></div>
+        
+        <!-- 装饰性元素 -->
+        <div class="absolute -top-40 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-20 -left-20 w-72 h-72 bg-secondary/10 rounded-full blur-3xl"></div>
+        
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                  <h1 class="text-[clamp(2.5rem,5vw,4rem)] font-bold leading-tight text-dark mb-6" data-lang-key="hero.title">
+                      专业<span class="text-primary">区块链策略开发</span>与量化交易服务
+                  </h1>
+                  <p class="text-[clamp(1rem,2vw,1.25rem)] text-gray-600 mb-10 leading-relaxed" data-lang-key="hero.subtitle">
+                      我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。
+                  </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                      <a href="https://t.me/mevjk_bot" target="_blank" class="w-full sm:w-auto px-8 py-3 rounded-full bg-gradient-primary text-white font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" data-lang-key="btn.experience" id="telegramLink2">
+                          开始体验
+                      </a>
+                      <button class="w-full sm:w-auto px-8 py-3 rounded-full border border-gray-300 text-gray-700 font-medium text-lg hover:bg-gray-50 transition-all duration-300 flex items-center justify-center gap-2" data-lang-key="btn.demo">
+                          <i class="fa fa-play-circle-o text-primary"></i>
+                          观看演示
+                      </button>
+                  </div>
+            </div>
+            
+            <!-- 信任标识 -->
+            <div class="mt-20">
+                <p class="text-center text-gray-500 mb-6" data-lang-key="trusted.title">受到行业领先企业的信任</p>
+                <div class="flex flex-wrap justify-center items-center gap-8 sm:gap-16">
+                    <div class="text-gray-400 font-semibold">Binance</div>
+                    <div class="text-gray-400 font-semibold">OKX</div>
+                    <div class="text-gray-400 font-semibold">Gate.io</div>
+                    <div class="text-gray-400 font-semibold">Bitget</div>
+                    <div class="text-gray-400 font-semibold">XT</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- 核心优势 -->
+    <section id="features" class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-4" data-lang-key="features.title">我们的核心优势</h2>
+                <p class="text-gray-600 text-lg" data-lang-key="features.subtitle">谷比算力凭借专业的技术团队和丰富的行业经验，为您提供全方位的区块链量化交易解决方案</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 优势卡片1 -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                        <i class="fa fa-line-chart text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" data-lang-key="feature.smart.title">智能交易系统</h3>
+                    <p class="text-gray-600" data-lang-key="feature.smart.desc">利用先进的算法和机器学习技术，提供高效的智能交易解决方案，帮助用户最大化收益。我们的系统可以7x24小时不间断监控市场动态，自动执行交易策略。</p>
+                </div>
+                
+                <!-- 优势卡片2 -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center mb-6">
+                        <i class="fa fa-shield text-2xl text-secondary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" data-lang-key="feature.risk.title">风险控制系统</h3>
+                    <p class="text-gray-600" data-lang-key="feature.risk.desc">通过多层次的风险控制体系，确保用户资产的安全性和稳定性。我们采用实时监控、动态止损和资产分散等多种手段，最大程度降低投资风险。</p>
+                </div>
+                
+                <!-- 优势卡片3 -->
+                <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                        <i class="fa fa-database text-2xl text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4" data-lang-key="feature.data.title">数据分析服务</h3>
+                    <p class="text-gray-600" data-lang-key="feature.data.desc">提供全面的区块链数据分析和可视化服务，帮助用户深入了解市场趋势和投资机会。我们的专业团队定期发布行业研究报告。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 服务内容 -->
+    <section id="services" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-4" data-lang-key="services.title">我们的服务内容</h2>
+                <p class="text-gray-600 text-lg" data-lang-key="services.subtitle">谷比算力提供全方位的区块链技术服务，助力您在数字资产领域取得成功</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- 服务列表 -->
+                <div class="space-y-8">
+                    <!-- 服务项目1 -->
+                    <div class="flex gap-6 items-start">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa fa-cogs text-xl text-primary"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2" data-lang-key="service.strategy.title">策略开发服务</h3>
+                            <p class="text-gray-600" data-lang-key="service.strategy.desc">根据您的投资目标和风险偏好，我们的专业团队为您量身定制专属交易策略，并提供持续优化和调整服务。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 服务项目2 -->
+                    <div class="flex gap-6 items-start">
+                        <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa fa-bar-chart text-xl text-secondary"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2" data-lang-key="service.market.title">数据采集与分析</h3>
+                            <p class="text-gray-600" data-lang-key="service.market.desc">提供全面的区块链和交易数据分析服务，包括行情数据、链上数据采集，以及深度分析报告，帮助您把握投资机会。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 服务项目3 -->
+                    <div class="flex gap-6 items-start">
+                        <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa fa-flask text-xl text-primary"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2" data-lang-key="service.backtest.title">策略回测系统</h3>
+                            <p class="text-gray-600" data-lang-key="service.backtest.desc">我们的回测系统允许您在历史数据上测试交易策略，评估其性能和风险，帮助您做出更明智的投资决策。</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 服务项目4 -->
+                    <div class="flex gap-6 items-start">
+                        <div class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                            <i class="fa fa-random text-xl text-secondary"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold mb-2" data-lang-key="service.api.title">自动化交易</h3>
+                            <p class="text-gray-600" data-lang-key="service.api.desc">基于您的交易策略，我们提供自动化交易系统，实现7x24小时不间断交易，提高交易效率，降低人为错误。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 数据可视化 -->
+                <div class="bg-white p-6 rounded-2xl shadow-lg">
+                    <h3 class="text-xl font-bold mb-6" data-lang-key="services.chart.title">服务效果数据</h3>
+                    <div class="w-full h-80">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 交易所分析部分 - 现代化卡片式布局 -->
+    <section id="exchanges" class="py-20 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-dark mb-4" data-lang-key="exchanges.title">
+                    交易所分析
+                </h2>
+                <p class="text-gray-600 text-lg" data-lang-key="exchanges.subtitle">
+                    通过我们的合作伙伴专属链接注册，可享受所有策略指标、交易工具和策略定制
+                </p>
+            </div>
+
+            <!-- 交易所卡片网格布局 - 电脑端每行3个 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 芝麻 (Gate.io) 卡片 -->
+                <div class="exchange-card">
+                    <!-- 顶部渐变装饰条 -->
+                    <div class="exchange-card-decoration" style="background: linear-gradient(90deg, #3339ea, #c048ec);"></div>
+                    
+                    <!-- 顶部：Logo名称和立即注册按钮 -->
+                    <div class="exchange-header">
+                        <div class="exchange-logo-section">
+                            <img src="img/gateio2.jpg" alt="Gate.io" class="exchange-logo">
+                            <h3 class="exchange-name" data-lang-key="exchange.gate.title">芝麻 (Gate.io)</h3>
+                        </div>
+                        <a href="https://www.gatenode.cloud/signup/VLURVV9EVG?ref_type=103" target="_blank" class="exchange-register-btn bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white">
+                            <span data-lang-key="btn.register">立即注册</span>
+                        </a>
+                    </div>
+                    
+                    <!-- 基本信息一行 -->
+                    <div class="exchange-basic-info">
+                        <div class="exchange-basic-info-scroll">
+                            <div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.founded">成立时间:</span><i class="fa fa-building-o ml-1 mr-1"></i>2013年</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.pairs">交易对:</span><i class="fa fa-exchange ml-1 mr-1"></i>1400+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.headquarters">总部:</span><i class="fa fa-map-marker ml-1 mr-1"></i>Cayman Islands</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.volume">24h交易量:</span><i class="fa fa-line-chart ml-1 mr-1"></i>$1.5B+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.fee">交易费用:</span><i class="fa fa-tag ml-1 mr-1"></i>0.2%</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.currencies">支持币种:</span><i class="fa fa-coins ml-1 mr-1"></i>500+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.rating">评分:</span><i class="fa fa-star text-yellow-400 ml-1 mr-1"></i>4.5/5</div>
+                            </div>
+                        </div>
+                    </div>        
+                    <!-- 优缺点区域 -->
+                    <div class="exchange-pros-cons">
+                        <!-- 优点一格 -->
+                        <div class="exchange-section exchange-pros">
+                            <div class="exchange-section-header" data-lang-key="exchange.pros.title">优点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.gate.pros.1">交易对丰富，包含大量小众加密货币</li>
+                                    <li data-lang-key="exchange.gate.pros.2">界面简洁易用，对新手友好</li>
+                                    <li data-lang-key="exchange.gate.pros.3">交易手续费低，提供VIP费率体系</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 缺点一格 -->
+                        <div class="exchange-section exchange-cons">
+                            <div class="exchange-section-header" data-lang-key="exchange.cons.title">缺点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.gate.cons.1">客户响应较慢，问题解决时间长</li>
+                                    <li data-lang-key="exchange.gate.cons.2">部分国家和地区的支持有限</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 币安 (Binance) 卡片 -->
+                <div class="exchange-card">
+                    <!-- 顶部渐变装饰条 -->
+                    <div class="exchange-card-decoration" style="background: linear-gradient(90deg, #3B82F6, #10B981);"></div>
+                    
+                    <!-- 顶部：Logo名称和立即注册按钮 -->
+                    <div class="exchange-header">
+                        <div class="exchange-logo-section">
+                            <img src="img/Binance2.png" alt="Binance" class="exchange-logo">
+                            <h3 class="exchange-name" data-lang-key="exchange.binance.title">币安 (Binance)</h3>
+                        </div>
+                        <a href="https://accounts.maxweb.black/register?ref=1090079770" target="_blank" class="exchange-register-btn bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white">
+                            <span data-lang-key="btn.register">立即注册</span>
+                        </a>
+                    </div>
+                    
+                    <!-- 基本信息一行 -->
+                    <div class="exchange-basic-info">
+                        <div class="exchange-basic-info-scroll">
+                            <div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.founded">成立时间:</span><i class="fa fa-building-o ml-1 mr-1"></i>2017年</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.pairs">交易对:</span><i class="fa fa-exchange ml-1 mr-1"></i>1000+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.headquarters">总部:</span><i class="fa fa-map-marker ml-1 mr-1"></i>Seychelles</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.volume">24h交易量:</span><i class="fa fa-line-chart ml-1 mr-1"></i>$12B+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.fee">交易费用:</span><i class="fa fa-tag ml-1 mr-1"></i>0.15%</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.currencies">支持币种:</span><i class="fa fa-coins ml-1 mr-1"></i>800+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.rating">评分:</span><i class="fa fa-star text-yellow-400 ml-1 mr-1"></i>4.0/5</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <!-- 优缺点区域 -->
+                    <div class="exchange-pros-cons">
+                        <!-- 优点一格 -->
+                        <div class="exchange-section exchange-pros">
+                            <div class="exchange-section-header" data-lang-key="exchange.pros.title">优点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.binance.pros.1">最大加密货币交易所，流动性大</li>
+                                    <li data-lang-key="exchange.binance.pros.2">币种超过1000种，选择极为丰富</li>
+                                    <li data-lang-key="exchange.binance.pros.4">币安智能链(BSC)，生态系统完善</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 缺点一格 -->
+                        <div class="exchange-section exchange-cons">
+                            <div class="exchange-section-header" data-lang-key="exchange.cons.title">缺点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.binance.cons.1">对某些地区的用户有限制政策</li>
+                                    <li data-lang-key="exchange.binance.cons.2">面临监管审查和政策风险</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 欧易 (OKX) 卡片 -->
+                <div class="exchange-card">
+                    <!-- 顶部渐变装饰条 -->
+                    <div class="exchange-card-decoration" style="background: linear-gradient(90deg, #F97316, #EAB308);"></div>
+                    
+                    <!-- 顶部：Logo名称和立即注册按钮 -->
+                    <div class="exchange-header">
+                        <div class="exchange-logo-section">
+                            <img src="img/okx2.png" alt="OKX" class="exchange-logo">
+                            <h3 class="exchange-name" data-lang-key="exchange.okx.title">欧易 (OKX)</h3>
+                        </div>
+                        <a href="https://www.plwebnne.com/join/GUBUT" target="_blank" class="exchange-register-btn bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white">
+                            <span data-lang-key="btn.register">立即注册</span>
+                        </a>
+                    </div>
+                    
+                    <!-- 基本信息一行 -->
+                    <div class="exchange-basic-info">
+                        <div class="exchange-basic-info-scroll">
+                            <div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.founded">成立时间:</span><i class="fa fa-building-o ml-1 mr-1"></i>2017年</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.pairs">交易对:</span><i class="fa fa-exchange ml-1 mr-1"></i>1000+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.headquarters">总部:</span><i class="fa fa-map-marker ml-1 mr-1"></i>Seychelles</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.volume">24h交易量:</span><i class="fa fa-line-chart ml-1 mr-1"></i>$12B+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.fee">交易费用:</span><i class="fa fa-tag ml-1 mr-1"></i>0.15%</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.currencies">支持币种:</span><i class="fa fa-coins ml-1 mr-1"></i>800+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.rating">评分:</span><i class="fa fa-star text-yellow-400 ml-1 mr-1"></i>4.0/5</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <!-- 优缺点区域 -->
+                    <div class="exchange-pros-cons">
+                        <!-- 优点一格 -->
+                        <div class="exchange-section exchange-pros">
+                            <div class="exchange-section-header" data-lang-key="exchange.pros.title">优点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.okx.pros.2">合约交易系统成熟，交易量全球领先</li>
+                                    <li data-lang-key="exchange.okx.pros.3">安全等级高，历史上没有重大安全事故</li>
+                                    <li data-lang-key="exchange.okx.pros.4">提供OKC公链和丰富的DeFi生态支持</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 缺点一格 -->
+                        <div class="exchange-section exchange-cons">
+                            <div class="exchange-section-header" data-lang-key="exchange.cons.title">缺点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.okx.cons.1">界面较为复杂，初学者需要适应时间</li>
+                                    <li data-lang-key="exchange.okx.cons.2">部分高级功能对新手不够友好</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bitunix 卡片 -->
+                <div class="exchange-card">
+                    <!-- 顶部渐变装饰条 -->
+                    <div class="exchange-card-decoration" style="background: linear-gradient(90deg, #3B82F6, #8B5CF6);"></div>
+                    
+                    <!-- 顶部：Logo名称和立即注册按钮 -->
+                    <div class="exchange-header">
+                        <div class="exchange-logo-section">
+                            <img src="img/bitunix2.jpg" alt="Bitunix" class="exchange-logo">
+                            <h3 class="exchange-name" data-lang-key="exchange.bitunix.title">Bitunix</h3>
+                        </div>
+                        <a href="https://www.bitunix.com/register?inviteCode=717517" target="_blank" class="exchange-register-btn bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white">
+                            <span data-lang-key="btn.register">立即注册</span>
+                        </a>
+                    </div>
+                    
+                    <!-- 基本信息一行 -->
+                    <div class="exchange-basic-info">
+                        <div class="exchange-basic-info-scroll">
+                            <div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.founded">成立时间:</span><i class="fa fa-building-o ml-1 mr-1"></i>2021年</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.pairs">交易对:</span><i class="fa fa-exchange ml-1 mr-1"></i>500+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.headquarters">总部:</span><i class="fa fa-map-marker ml-1 mr-1"></i>Singapore</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.volume">24h交易量:</span><i class="fa fa-line-chart ml-1 mr-1"></i>$200M+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.fee">交易费用:</span><i class="fa fa-tag ml-1 mr-1"></i>0.2%</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.currencies">支持币种:</span><i class="fa fa-coins ml-1 mr-1"></i>300+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.rating">评分:</span><i class="fa fa-star text-yellow-400 ml-1 mr-1"></i>3.5/5</div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <!-- 优缺点区域 -->
+                    <div class="exchange-pros-cons">
+                        <!-- 优点一格 -->
+                        <div class="exchange-section exchange-pros">
+                            <div class="exchange-section-header" data-lang-key="exchange.pros.title">优点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.bitunix.pros.1">界面设计简洁友好，操作流畅</li>
+                                    <li data-lang-key="exchange.bitunix.pros.2">新币上线快，经常有热门项目</li>
+                                    <li data-lang-key="exchange.bitunix.pros.3">平台活动丰富，有较多福利</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 缺点一格 -->
+                        <div class="exchange-section exchange-cons">
+                            <div class="exchange-section-header" data-lang-key="exchange.cons.title">缺点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.bitunix.cons.1">整体交易量较小，部分流动性不足</li>
+                                    <li data-lang-key="exchange.bitunix.cons.2">在加密货币市场中的知名度较低</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- XT 卡片 -->
+                <div class="exchange-card">
+                    <!-- 顶部渐变装饰条 -->
+                    <div class="exchange-card-decoration" style="background: linear-gradient(90deg, #F97316, #EC4899);"></div>
+                    
+                    <!-- 顶部：Logo名称和立即注册按钮 -->
+                    <div class="exchange-header">
+                        <div class="exchange-logo-section">
+                            <img src="img/xt2.png" alt="XT" class="exchange-logo">
+                            <h3 class="exchange-name" data-lang-key="exchange.xt.title">XT</h3>
+                        </div>
+                        <a href="https://www.xt.com/zh-CN/accounts/register?ref=ZH9HWY" target="_blank" class="exchange-register-btn bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white">
+                            <span data-lang-key="btn.register">立即注册</span>
+                        </a>
+                    </div>
+                    
+                    <!-- 基本信息一行 -->
+                    <div class="exchange-basic-info">
+                        <div class="exchange-basic-info-scroll">
+                            <div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.founded">成立时间:</span><i class="fa fa-building-o ml-1 mr-1"></i>2018年</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.pairs">交易对:</span><i class="fa fa-exchange ml-1 mr-1"></i>800+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.headquarters">总部:</span><i class="fa fa-map-marker ml-1 mr-1"></i>Hong Kong</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.volume">24h交易量:</span><i class="fa fa-line-chart ml-1 mr-1"></i>$500M+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.fee">交易费用:</span><i class="fa fa-tag ml-1 mr-1"></i>0.2%</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.currencies">支持币种:</span><i class="fa fa-coins ml-1 mr-1"></i>500+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.rating">评分:</span><i class="fa fa-star text-yellow-400 ml-1 mr-1"></i>4.0/5</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 优缺点区域 -->
+                    <div class="exchange-pros-cons">
+                        <!-- 优点一格 -->
+                        <div class="exchange-section exchange-pros">
+                            <div class="exchange-section-header" data-lang-key="exchange.pros.title">优点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.xt.pros.1">活动丰富，定期推出交易大赛和奖励活动</li>
+                                    <li data-lang-key="exchange.xt.pros.2">交易系统稳定流畅，很少出现卡顿或延迟</li>
+                                    <li data-lang-key="exchange.xt.pros.3">整体用户体验良好，客服响应及时</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 缺点一格 -->
+                        <div class="exchange-section exchange-cons">
+                            <div class="exchange-section-header" data-lang-key="exchange.cons.title">缺点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.xt.cons.1">支持的币种相对较少，特别是小众币种</li>
+                                    <li data-lang-key="exchange.xt.cons.2">市场深度一般，大额交易可能面临滑点</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bitget 卡片 -->
+                <div class="exchange-card">
+                    <!-- 顶部渐变装饰条 -->
+                    <div class="exchange-card-decoration" style="background: linear-gradient(90deg, #6366F1, #14B8A6);"></div>
+                    
+                    <!-- 顶部：Logo名称和立即注册按钮 -->
+                    <div class="exchange-header">
+                        <div class="exchange-logo-section">
+                            <img src="img/bitget2.png" alt="Bitget" class="exchange-logo">
+                            <h3 class="exchange-name" data-lang-key="exchange.bitget.title">Bitget</h3>
+                        </div>
+                        <a href="https://partner.niftah.cn/bg/E7MZJV" target="_blank" class="exchange-register-btn bg-gradient-to-r from-indigo-500 to-teal-500 hover:from-indigo-600 hover:to-teal-600 text-white">
+                            <span data-lang-key="btn.register">立即注册</span>
+                        </a>
+                    </div>
+                    
+                    <!-- 基本信息一行 -->
+                    <div class="exchange-basic-info">
+                        <div class="exchange-basic-info-scroll">
+                            <div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.founded">成立时间:</span><i class="fa fa-building-o ml-1 mr-1"></i>2018年</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.pairs">交易对:</span><i class="fa fa-exchange ml-1 mr-1"></i>700+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.headquarters">总部:</span><i class="fa fa-map-marker ml-1 mr-1"></i>Singapore</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.volume">24h交易量:</span><i class="fa fa-line-chart ml-1 mr-1"></i>$3B+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.fee">交易费用:</span><i class="fa fa-tag ml-1 mr-1"></i>0.2%</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.currencies">支持币种:</span><i class="fa fa-coins ml-1 mr-1"></i>400+</div>
+                                <div class="exchange-info-item"><span data-lang-key="exchange.info.rating">评分:</span><i class="fa fa-star text-yellow-400 ml-1 mr-1"></i>3.5/5</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 优缺点区域 -->
+                    <div class="exchange-pros-cons">
+                        <!-- 优点一格 -->
+                        <div class="exchange-section exchange-pros">
+                            <div class="exchange-section-header" data-lang-key="exchange.pros.title">优点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.bitget.pros.1">合约交易强大，支持多种合约类型</li>
+                                    <li data-lang-key="exchange.bitget.pros.2">创新的跟单交易功能，适合新手跟随</li>
+                                    <li data-lang-key="exchange.bitget.pros.3">界面设计简洁明了，操作便捷</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 缺点一格 -->
+                        <div class="exchange-section exchange-cons">
+                            <div class="exchange-section-header" data-lang-key="exchange.cons.title">缺点</div>
+                            <div class="exchange-section-content">
+                                <ul>
+                                    <li data-lang-key="exchange.bitget.cons.1">现货交易功能相对较弱，交易量较小</li>
+                                    <li data-lang-key="exchange.bitget.cons.2">部分交易对市场深度不足，影响交易体验</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 悬浮社交按钮 -->
+    <div class="social-floating fixed bottom-24 right-6 z-50 flex flex-col gap-3">
+        <a href="https://t.me/mevjk_bot" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <i class="fa fa-paper-plane text-xl"></i>
+        </a>
+        <a href="https://x.com/gubutdata" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+            <i class="fa fa-twitter text-xl"></i>
+        </a>
+    </div>
+
+    <!-- 最新资讯 -->
+    <section id="articles" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16 opacity-0" id="articles-header">
+                <div class="inline-block mb-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        <i class="fa fa-newspaper-o mr-1"></i>
+                        <span data-lang-key="articles.live">实时更新</span>
+                    </span>
+                </div>
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-gray-800 mb-4 relative inline-block" data-lang-key="articles.title">
+                    最新资讯
+                    <div class="absolute -bottom-2 left-1/4 right-1/4 h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 rounded-full"></div>
+                </h2>
+                <p class="text-gray-600 text-lg leading-relaxed" data-lang-key="articles.subtitle">
+                    了解区块链和量化交易的最新动态和深度分析
+                </p>
+            </div>
+            
+            <script>
+                // 为资讯标题添加淡入动画
+                document.addEventListener('DOMContentLoaded', function() {
+                    const header = document.getElementById('articles-header');
+                    if (header) {
+                        setTimeout(() => {
+                            header.classList.add('transition-opacity', 'duration-1000');
+                            header.classList.remove('opacity-0');
+                        }, 500);
+                    }
+                });
+            </script>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="latestArticles">
+                <!-- 文章将通过JavaScript动态加载 -->
+                <div class="no-articles bg-white rounded-xl p-8 text-center shadow-sm border border-gray-100">
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                        <i class="fa fa-newspaper-o text-gray-400 text-2xl"></i>
+                    </div>
+                    <p class="text-gray-500" data-lang-key="articles.loading">
+                        加载文章中...
+                    </p>
+                </div>
+            </div>
+            
+            <script>
+                // 页面加载完成后加载最新文章
+                document.addEventListener('DOMContentLoaded', function() {
+                    loadLatestArticles();
+                });
+                
+                // 加载最新的3篇文章
+                function loadLatestArticles() {
+                    const articlesContainer = document.getElementById('latestArticles');
+                    
+                    // 默认文章数据，作为后备
+                    const defaultArticles = [
+                        {
+                            id: '1',
+                            title: '趨勢交易全攻略',
+                            date: '2023-06-15',
+                            url: './new/article-1.html',
+                            content: '趨勢交易是一種追隨市場趨勢的交易策略，本攻略將詳細介紹趨勢交易的基本原則、技術指標應用以及風險管理方法...'
+                        },
+                        {
+                            id: '2',
+                            title: '比特幣價格分析：三個關鍵支撑位決定近期趨勢',
+                            date: '2023-06-10',
+                            url: './new/article-2.html',
+                            content: '本文深入分析比特幣當前價格趨勢，重點關注三個關鍵支撑位，以及它們如何影響比特幣的短期和中期價格表現...'
+                        },
+                        {
+                            id: '3',
+                            title: '闪电贷攻击全解析：一笔交易如何完成 161 次代币转移？',
+                            date: '2023-06-05',
+                            url: './new/article-3.html',
+                            content: '本文详细解析了一起复杂的闪电贷攻击案例，揭示了攻击者如何在单笔交易中完成161次代币转移，以及如何防范此类攻击...'
+                        }
+                    ];
+                    
+                    try {
+                        // 立即显示默认文章，确保用户能看到内容
+                        displayLatestArticles(defaultArticles);
+                        
+                        // 尝试异步加载实际的articles.json文件进行更新
+                        fetch('articles.json')
+                            .then(response => {
+                                if (response.ok) {
+                                    return response.json();
+                                }
+                                throw new Error('网络响应异常');
+                            })
+                            .then(articles => {
+                                if (Array.isArray(articles) && articles.length > 0) {
+                                    // 处理文章数据格式
+                                    const processedArticles = articles.map(article => ({
+                                        id: article.id || Math.random().toString(36).substr(2, 9),
+                                        title: article.title || '无标题文章',
+                                        date: article.date || '2023-01-01',
+                                        url: `./new/article-${article.id || Math.random().toString(36).substr(2, 9)}.html`,
+                                        content: article.content || ''
+                                    }));
+                                    
+                                    // 按日期排序，最新的在前面
+                                    processedArticles.sort((a, b) => {
+                                        const dateA = new Date(a.date);
+                                        const dateB = new Date(b.date);
+                                        return dateB - dateA;
+                                    });
+                                    
+                                    // 只取最新的3篇文章
+                                    const latestArticles = processedArticles.slice(0, 3);
+                                    
+                                    // 更新显示实际文章
+                                    displayLatestArticles(latestArticles);
+                                }
+                            })
+                            .catch(error => {
+                                console.log('无法加载最新文章数据，使用默认文章:', error.message);
+                                // 保持显示默认文章，不显示错误信息
+                            });
+                    } catch (error) {
+                        console.error('加载文章时发生错误:', error);
+                        // 显示默认文章
+                        displayLatestArticles(defaultArticles);
+                    }
+                }
+                
+                // 显示最新文章
+                function displayLatestArticles(articles) {
+                    const articlesContainer = document.getElementById('latestArticles');
+                    
+                    if (articles.length === 0) {
+                        articlesContainer.innerHTML = `
+                            <div class="col-span-full bg-white rounded-xl p-8 text-center shadow-sm border border-gray-100">
+                                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                                    <i class="fa fa-folder-open-o text-gray-400 text-2xl"></i>
+                                </div>
+                                <p class="text-gray-500">
+                                    暂无文章
+                                </p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    articlesContainer.innerHTML = '';
+                    
+                    articles.forEach(article => {
+                        const articleCard = document.createElement('div');
+                        articleCard.className = 'bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300';
+                        
+                        // 提取文章预览内容（纯文本，最多150个字符）
+                        const previewText = extractPreviewText(article.content);
+                        
+                        articleCard.innerHTML = `
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold mb-3 line-clamp-2">${escapeHtml(article.title)}</h3>
+                                <p class="text-gray-600 mb-4 line-clamp-3">${escapeHtml(previewText)}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-gray-500">${article.date}</span>
+                                    <a href="${article.url}" class="text-primary font-medium hover:underline">
+                                        阅读更多 →
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        
+                        articlesContainer.appendChild(articleCard);
+                    });
+                }
+                
+                // 从HTML内容中提取纯文本预览
+                function extractPreviewText(htmlContent) {
+                    // 创建一个临时元素来解析HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = htmlContent;
+                    
+                    // 获取纯文本
+                    const text = tempDiv.textContent || tempDiv.innerText || '';
+                    
+                    // 去除多余的空格和换行符
+                    const cleanText = text.replace(/\s+/g, ' ').trim();
+                    
+                    // 限制长度 - 首页资讯卡片内容缩短至80个字符
+                    return cleanText.length > 80 ? cleanText.substring(0, 80) + '...' : cleanText;
+                }
+                
+                // HTML转义函数，防止XSS攻击
+                function escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+            </script>
+        </div>
+    </section>
+
+
+    <!-- 数据信号服务板块 -->
+    <section class="py-8 min-h-[20vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-700 text-white">
+        <div class="container mx-auto px-2 sm:px-6 lg:px-8 w-full">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4" data-lang-key="signals.title">
+                    数据信号服务
+                </h2>
+                <p class="text-blue-100 text-lg" data-lang-key="signals.subtitle">
+                    快人一步的行情数据，让你在别人还没反应时，就已经进场
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🔔</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.new.title">
+                        新币上线提醒
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.new.desc">
+                        第一时间获取新币上线信息，抢占先机
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🚀</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.market.title">
+                        市场异动推送
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.market.desc">
+                        实时推送资金流异常、盘口深度变化等关键信号
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">💎</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.vip.title">
+                        VIP社群服务
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.vip.desc">
+                        加入专属社群，获取全部信号和深度指标
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn">
+                    免费获取信号
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 底部 -->
+    <footer class="bg-gray-900 text-gray-400 py-10 border-t border-gray-800">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <p class="text-sm" data-lang-key="footer.copyright">© 2024 谷比算力. 版权所有.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="privacy.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.privacy">隐私政策</a>
+                    <a href="terms.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.terms">使用条款</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.contact">联系我们</a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm" data-lang-key="footer.risk">
+                风险提示：加密货币交易具有高风险，请谨慎投资
+            </div>
+        </div>
+    </footer>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 页面加载完成后执行额外的初始化操作
+        document.addEventListener('DOMContentLoaded', function() {
+            // 监听语言切换事件
+            document.addEventListener('languageChanged', function(e) {
+                console.log('Language changed to:', e.detail.language);
+                // 这里可以添加语言切换后的额外处理逻辑
+            });
+            
+            // 导航栏滚动效果
+            const navbar = document.querySelector('.navbar');
+            
+            if (navbar) {
+                // 初始检查页面滚动位置
+                checkScrollPosition();
+                
+                // 监听滚动事件
+                window.addEventListener('scroll', function() {
+                    checkScrollPosition();
+                });
+                
+                function checkScrollPosition() {
+                    if (window.scrollY > 20) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                }
+            }
+        });
+    </script>
+    
+</body>
+</html>

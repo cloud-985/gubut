@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <title>使用条款 - 谷比算力</title>
+    <meta name="keywords" content="区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易">
+    <meta name="description" content="谷比算力使用条款。我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。">
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- 引入语言切换组件 -->
+    <script src="lang.js"></script>
+    
+    <!-- 网站配置加载脚本 -->
+    <script>
+        // 加载网站配置
+        function loadSiteConfig() {
+            fetch('/api/site-config')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应错误');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.config) {
+                        const config = data.config;
+                        
+                        // 更新网站名称
+                        const siteNameElement = document.getElementById('siteName');
+                        if (siteNameElement) {
+                            siteNameElement.textContent = config.siteName || '谷比算力';
+                        }
+                        
+                        // 更新页面标题
+                        const pageTitleElement = document.querySelector('title');
+                        if (pageTitleElement) {
+                            const originalTitle = pageTitleElement.textContent;
+                            const titleParts = originalTitle.split(' - ');
+                            if (titleParts.length > 1) {
+                                pageTitleElement.textContent = titleParts[0] + ' - ' + (config.siteName || '谷比算力');
+                            }
+                        }
+                        
+                        // 更新Logo
+                        const logoElement = document.getElementById('siteLogo');
+                        if (logoElement) {
+                            logoElement.src = config.logo || 'img/logo.png';
+                            logoElement.alt = config.siteName || '谷比算力';
+                        }
+                        
+                        // 更新Meta标签
+                        if (config.keywords) {
+                            const keywordsElement = document.querySelector('meta[name="keywords"]');
+                            if (keywordsElement) {
+                                keywordsElement.content = config.keywords;
+                            }
+                        }
+                        
+                        if (config.description) {
+                            const descriptionElement = document.querySelector('meta[name="description"]');
+                            if (descriptionElement) {
+                                descriptionElement.content = config.description;
+                            }
+                        }
+                        
+                        // 更新社交媒体链接
+                        if (config.social && config.social.telegram) {
+                            const telegramLink1 = document.getElementById('telegramLink1');
+                            if (telegramLink1) {
+                                telegramLink1.href = config.social.telegram;
+                            }
+                            
+                            const telegramLink2 = document.getElementById('telegramLink2');
+                            if (telegramLink2) {
+                                telegramLink2.href = config.social.telegram;
+                            }
+                        }
+                        
+                        if (config.social && config.social.twitter) {
+                            const xLinkElement = document.getElementById('xLink');
+                            if (xLinkElement) {
+                                xLinkElement.href = config.social.twitter;
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('加载网站配置时出错:', error);
+                });
+        }
+        
+        // 页面加载时获取配置
+        document.addEventListener('DOMContentLoaded', loadSiteConfig);
+    </script>
+    
+    <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#111827',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo - 点击跳转到首页 -->
+                <a href="index.html" class="flex items-center space-x-2 hover:opacity-90 transition-opacity duration-300">
+                    <img src="img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto" id="siteLogo">
+                    <span class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name" id="siteName">谷比算力</span>
+                </a>
+                <!-- 操作按钮 -->
+                <div class="flex items-center space-x-4">
+                    <a href="https://t.me/mevjk_bot" target="_blank" class="hidden md:block px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 font-medium transition-all-300 shadow-md hover:shadow-lg" data-lang-key="btn.start" id="telegramLink1">
+                        立即开始
+                    </a>
+                    <button class="md:hidden px-2 py-1 border border-primary/50 text-primary rounded-md hover:bg-primary/5 transition-colors" data-lang-switch>
+                        <span data-lang-btn-text>EN</span>
+                    </button>
+
+                    <button class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 font-medium transition-all-300" data-lang-switch>
+                        <span data-lang-btn-text>EN</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- 使用条款内容 -->
+    <div class="article-container">
+        <article class="article-content">
+            <h1 data-lang="zh">使用条款</h1>
+            <h1 data-lang="en" class="hidden-lang">Terms of Service</h1>
+            
+            <div data-lang="zh" class="terms-content">
+                <h2>使用条款</h2>
+                <p>欢迎使用谷比算力网站和服务。请仔细阅读以下条款和条件，因为它们规定了您使用我们网站和服务的规则。</p>
+                <p>通过访问或使用谷比算力（gubut.com）网站及其提供的任何服务，您同意受本使用条款的约束。如果您不同意这些条款，请不要使用我们的网站或服务。</p>
+                
+                <h2>服务描述</h2>
+                <p>谷比算力提供区块链策略开发、量化交易策略、数据采集、行情数据接口、K线数据、交易所API、策略回测、Web3数据、区块链数据分析和自动化交易等相关服务和信息。我们保留随时修改、暂停或终止任何服务的权利，无需事先通知。</p>
+                
+                <h2>用户责任</h2>
+                <p>作为用户，您同意：</p>
+                <ul>
+                    <li>遵守所有适用的法律法规</li>
+                    <li>不使用我们的服务进行任何非法或未经授权的活动</li>
+                    <li>不干扰或中断我们的服务或服务器和网络</li>
+                    <li>不尝试未经授权访问我们的服务、账户、计算机系统或网络</li>
+                    <li>不复制、修改、分发、出售或租赁我们服务的任何部分</li>
+                </ul>
+                
+                <h2>知识产权</h2>
+                <p>谷比算力网站上的所有内容，包括但不限于文本、图像、图形、视频、音频、软件、代码、数据和其他材料，均为谷比算力或其许可方的财产，受著作权、商标和其他知识产权法律的保护。未经我们明确书面许可，您不得复制、修改、分发、传播、展示、执行、出版、许可、创建衍生作品或以其他方式使用这些内容。</p>
+                
+                <h2>免责声明</h2>
+                <p>谷比算力提供的所有信息和服务均"按原样"提供，不提供任何形式的保证，无论是明示的还是暗示的。我们不保证信息的准确性、完整性或及时性，也不保证服务的可靠性、安全性或可用性。</p>
+                <p>您使用我们的服务和依赖我们的信息所产生的任何风险均由您自行承担。在任何情况下，谷比算力及其董事、管理人员、员工、代理人或合作伙伴均不对任何直接、间接、偶然、特殊、后果性或惩罚性损害承担责任，包括但不限于利润损失、数据丢失或业务中断，无论这些损害是如何产生的，也无论基于何种责任理论。</p>
+                
+                <h2>风险提示</h2>
+                <p>加密货币交易和投资具有高风险，价格波动剧烈。您应该了解相关风险，并在做出任何投资决策前进行充分的研究。谷比算力提供的信息仅供参考，不构成投资建议。</p>
+                
+                <h2>隐私政策</h2>
+                <p>我们的隐私政策解释了我们如何收集、使用和保护您的个人信息。通过使用我们的服务，您同意我们按照隐私政策的规定收集和使用您的信息。</p>
+                
+                <h2>条款修改</h2>
+                <p>谷比算力保留随时修改本使用条款的权利。修改后的条款将在我们的网站上发布，并自发布之日起生效。您继续使用我们的服务将被视为您接受修改后的条款。</p>
+                
+                <h2>终止</h2>
+                <p>谷比算力有权在任何时候，以任何理由，终止或暂停您对我们服务的访问，无需事先通知。您也可以随时停止使用我们的服务。</p>
+                
+                <h2>法律适用</h2>
+                <p>本使用条款受中国法律管辖，任何与本条款有关的争议应提交至谷比算力所在地有管辖权的法院解决。</p>
+                
+                <h2>联系我们</h2>
+                <p>如果您对本使用条款有任何问题或建议，请通过以下方式联系我们：</p>
+                <p>Telegram：<a href="https://t.me/mevjk_bot" target="_blank" id="telegramLink2">https://t.me/mevjk_bot</a></p>
+                <p>X (Twitter)：<a href="https://x.com/gubutdata" target="_blank" id="xLink">https://x.com/gubutdata</a></p>
+                
+                <p>最后更新日期：2024年6月</p>
+            </div>
+            
+            <div data-lang="en" class="terms-content hidden-lang">
+                <h2>Terms of Service</h2>
+                <p>Welcome to Gubi Computing website and services. Please read these terms and conditions carefully as they set out the rules for your use of our website and services.</p>
+                <p>By accessing or using the Gubi Computing (gubut.com) website and any services provided by it, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our website or services.</p>
+                
+                <h2>Service Description</h2>
+                <p>Gubi Computing provides services and information related to blockchain strategy development, quantitative trading strategies, data collection, market data interfaces, K-line data, exchange APIs, strategy backtesting, Web3 data, blockchain data analysis, and automated trading. We reserve the right to modify, suspend, or terminate any service at any time without prior notice.</p>
+                
+                <h2>User Responsibilities</h2>
+                <p>As a user, you agree to:</p>
+                <ul>
+                    <li>Comply with all applicable laws and regulations</li>
+                    <li>Not use our services for any illegal or unauthorized activities</li>
+                    <li>Not interfere with or disrupt our services or servers and networks</li>
+                    <li>Not attempt to gain unauthorized access to our services, accounts, computer systems, or networks</li>
+                    <li>Not copy, modify, distribute, sell, or lease any part of our services</li>
+                </ul>
+                
+                <h2>Intellectual Property</h2>
+                <p>All content on the Gubi Computing website, including but not limited to text, images, graphics, videos, audio, software, code, data, and other materials, are the property of Gubi Computing or its licensors and are protected by copyright, trademark, and other intellectual property laws. Without our express written permission, you may not copy, modify, distribute, transmit, display, perform, publish, license, create derivative works, or otherwise use these materials.</p>
+                
+                <h2>Disclaimer</h2>
+                <p>All information and services provided by Gubi Computing are provided "as is" without any warranty of any kind, either express or implied. We do not warrant the accuracy, completeness, or timeliness of the information, nor the reliability, security, or availability of the services.</p>
+                <p>Any risks arising from your use of our services and reliance on our information are borne by you. Under no circumstances shall Gubi Computing, its directors, officers, employees, agents, or partners be liable for any direct, indirect, incidental, special, consequential, or punitive damages, including but not limited to loss of profits, loss of data, or business interruption, however arising and under any theory of liability.</p>
+                
+                <h2>Risk Warning</h2>
+                <p>Cryptocurrency trading and investment involve high risks with剧烈 price fluctuations. You should understand the relevant risks and conduct thorough research before making any investment decisions. The information provided by Gubi Computing is for reference only and does not constitute investment advice.</p>
+                
+                <h2>Privacy Policy</h2>
+                <p>Our Privacy Policy explains how we collect, use, and protect your personal information. By using our services, you agree to our collection and use of your information in accordance with the Privacy Policy.</p>
+                
+                <h2>Modification of Terms</h2>
+                <p>Gubi Computing reserves the right to modify these Terms of Service at any time. Modified terms will be posted on our website and will take effect from the date of publication. Your continued use of our services will be deemed as your acceptance of the modified terms.</p>
+                
+                <h2>Termination</h2>
+                <p>Gubi Computing has the right to terminate or suspend your access to our services at any time, for any reason, without prior notice. You may also stop using our services at any time.</p>
+                
+                <h2>Applicable Law</h2>
+                <p>These Terms of Service are governed by the laws of China, and any disputes related to these terms shall be submitted to the competent court in the location where Gubi Computing is located for resolution.</p>
+                
+                <h2>Contact Us</h2>
+                <p>If you have any questions or suggestions about these Terms of Service, please contact us through the following methods:</p>
+                <p>Email: support@gubut.com</p>
+                <p>Telegram: <a href="https://t.me/mevjk_bot" target="_blank">https://t.me/mevjk_bot</a></p>
+                <p>X (Twitter): <a href="https://x.com/gubutdata" target="_blank">https://x.com/gubutdata</a></p>
+                
+                <p>Last Updated: June 2024</p>
+            </div>
+        </article>
+    </div>
+
+    <!-- 数据信号服务板块 -->
+    <section class="py-8 min-h-[20vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-700 text-white">
+        <div class="container mx-auto px-2 sm:px-6 lg:px-8 w-full">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4" data-lang-key="signals.title">
+                    数据信号服务
+                </h2>
+                <p class="text-blue-100 text-lg" data-lang-key="signals.subtitle">
+                    快人一步的行情数据，让你在别人还没反应时，就已经进场
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🔔</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.new.title">
+                        新币上线提醒
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.new.desc">
+                        第一时间获取新币上线信息，抢占先机
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🚀</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.market.title">
+                        市场异动推送
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.market.desc">
+                        实时推送资金流异常、盘口深度变化等关键信号
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">💎</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.vip.title">
+                        VIP社群服务
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.vip.desc">
+                        加入专属社群，获取全部信号和深度指标
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn" id="telegramLink4">
+                    免费获取信号
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 底部 -->
+    <footer class="bg-gray-900 text-gray-400 py-10 border-t border-gray-800">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <p class="text-sm" data-lang-key="footer.copyright">© 2024 谷比算力. 版权所有.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="privacy.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.privacy">隐私政策</a>
+                    <a href="terms.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.terms">使用条款</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.contact">联系我们</a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm" data-lang-key="footer.risk">
+                风险提示：加密货币交易具有高风险，请谨慎投资
+            </div>
+        </div>
+    </footer>
+
+    <script src="lang.js"></script>
+    
+    <!-- 网站配置加载脚本 -->
+    <script>
+        // 加载网站配置
+        function loadSiteConfig() {
+            fetch('/api/site-config')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应错误');
+                    }
+                    return response.json();
+                })
+                .then(config => {
+                    // 更新网站名称
+                    if (config.siteName) {
+                        const siteNameElement = document.getElementById('siteName');
+                        if (siteNameElement) {
+                            siteNameElement.textContent = config.siteName;
+                        }
+                        
+                        const pageTitleElement = document.querySelector('title');
+                        if (pageTitleElement) {
+                            const originalTitle = pageTitleElement.textContent;
+                            const titleParts = originalTitle.split(' - ');
+                            if (titleParts.length > 1) {
+                                pageTitleElement.textContent = titleParts[0] + ' - ' + config.siteName;
+                            }
+                        }
+                    }
+                    
+                    // 更新logo
+                    if (config.logo) {
+                        const logoElement = document.getElementById('siteLogo');
+                        if (logoElement) {
+                            logoElement.src = config.logo;
+                        }
+                    }
+                    
+                    // 更新meta标签
+                    if (config.keywords) {
+                        const keywordsElement = document.querySelector('meta[name="keywords"]');
+                        if (keywordsElement) {
+                            keywordsElement.content = config.keywords;
+                        }
+                    }
+                    
+                    if (config.description) {
+                        const descriptionElement = document.querySelector('meta[name="description"]');
+                        if (descriptionElement) {
+                            descriptionElement.content = config.description;
+                        }
+                    }
+                    
+                    // 更新社交媒体链接
+                    if (config.telegramLink) {
+                        const telegramLink1 = document.getElementById('telegramLink1');
+                        if (telegramLink1) {
+                            telegramLink1.href = config.telegramLink;
+                        }
+                        
+                        const telegramLink2 = document.getElementById('telegramLink2');
+                        if (telegramLink2) {
+                            telegramLink2.href = config.telegramLink;
+                        }
+                        
+                        const telegramLink4 = document.getElementById('telegramLink4');
+                        if (telegramLink4) {
+                            telegramLink4.href = config.telegramLink;
+                        }
+                    }
+                    
+                    if (config.xLink) {
+                        const xLinkElement = document.getElementById('xLink');
+                        if (xLinkElement) {
+                            xLinkElement.href = config.xLink;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载网站配置失败:', error);
+                });
+        }
+        
+        // 页面加载时获取配置
+        document.addEventListener('DOMContentLoaded', loadSiteConfig);
+    </script>
+    
+    <script>
+        // 导航栏滚动效果
+        const navbar = document.querySelector('.navbar');
+        
+        if (navbar) {
+            // 初始检查页面滚动位置
+            checkScrollPosition();
+            
+            // 监听滚动事件
+            window.addEventListener('scroll', function() {
+                checkScrollPosition();
+            });
+            
+            function checkScrollPosition() {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            }
+        }
+    </script>
+
+    </body>
+</html>

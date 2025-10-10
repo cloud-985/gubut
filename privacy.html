@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <title>隐私政策 - 谷比算力</title>
+    <meta name="keywords" content="区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易">
+    <meta name="description" content="谷比算力隐私政策。我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。">
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- 引入语言切换组件 -->
+    <script src="lang.js"></script>
+    
+    <!-- 网站配置加载脚本 -->
+    <script>
+        // 加载网站配置
+        function loadSiteConfig() {
+            fetch('/api/site-config')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应错误');
+                    }
+                    return response.json();
+                })
+                .then(config => {
+                    // 更新网站名称
+                    if (config.siteName) {
+                        const siteNameElement = document.getElementById('siteName');
+                        if (siteNameElement) {
+                            siteNameElement.textContent = config.siteName;
+                        }
+                        
+                        const pageTitleElement = document.querySelector('title');
+                        if (pageTitleElement) {
+                            const originalTitle = pageTitleElement.textContent;
+                            const titleParts = originalTitle.split(' - ');
+                            if (titleParts.length > 1) {
+                                pageTitleElement.textContent = titleParts[0] + ' - ' + config.siteName;
+                            }
+                        }
+                    }
+                    
+                    // 更新logo
+                    if (config.logo) {
+                        const logoElement = document.getElementById('siteLogo');
+                        if (logoElement) {
+                            logoElement.src = config.logo;
+                        }
+                    }
+                    
+                    // 更新meta标签
+                    if (config.keywords) {
+                        const keywordsElement = document.querySelector('meta[name="keywords"]');
+                        if (keywordsElement) {
+                            keywordsElement.content = config.keywords;
+                        }
+                    }
+                    
+                    if (config.description) {
+                        const descriptionElement = document.querySelector('meta[name="description"]');
+                        if (descriptionElement) {
+                            descriptionElement.content = config.description;
+                        }
+                    }
+                    
+                    // 更新社交媒体链接
+                    if (config.telegramLink) {
+                        const telegramLink1 = document.getElementById('telegramLink1');
+                        if (telegramLink1) {
+                            telegramLink1.href = config.telegramLink;
+                        }
+                        
+                        const telegramLink2 = document.getElementById('telegramLink2');
+                        if (telegramLink2) {
+                            telegramLink2.href = config.telegramLink;
+                        }
+                    }
+                    
+                    if (config.xLink) {
+                        const xLinkElement = document.getElementById('xLink');
+                        if (xLinkElement) {
+                            xLinkElement.href = config.xLink;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载网站配置失败:', error);
+                });
+        }
+        
+        // 页面加载时获取配置
+        document.addEventListener('DOMContentLoaded', loadSiteConfig);
+    </script>
+        <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#111827',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo - 点击跳转到首页 -->
+                <a href="index.html" class="flex items-center space-x-2 hover:opacity-90 transition-opacity duration-300">
+                    <img src="img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto" id="siteLogo">
+                    <span class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name" id="siteName">谷比算力</span>
+                </a>
+
+                <!-- 操作按钮 -->
+                <div class="flex items-center space-x-4">
+                    <a href="https://t.me/mevjk_bot" target="_blank" class="hidden md:block px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 font-medium transition-all-300 shadow-md hover:shadow-lg" data-lang-key="btn.start" id="telegramLink1">
+                        立即开始
+                    </a>
+                    <button class="md:hidden px-2 py-1 border border-primary/50 text-primary rounded-md hover:bg-primary/5 transition-colors" data-lang-switch>
+                        <span data-lang-btn-text>EN</span>
+                    </button>
+
+                    <button class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 font-medium transition-all-300" data-lang-switch>
+                        <span data-lang-btn-text>EN</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+        <!-- 悬浮社交按钮 -->
+    <div class="social-floating fixed bottom-24 right-6 z-50 flex flex-col gap-3">
+        <a href="https://t.me/mevjk_bot" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="telegramLink2">
+            <i class="fa fa-paper-plane text-xl"></i>
+        </a>
+        <a href="https://x.com/gubutdata" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="xLink">
+            <i class="fa fa-twitter text-xl"></i>
+        </a>
+    </div>
+    <!-- 隐私政策内容 -->
+    <div class="article-container">
+        <article class="article-content">
+            <h1 data-lang="zh">隐私政策</h1>
+            <h1 data-lang="en" class="hidden-lang">Privacy Policy</h1>
+            
+            <div data-lang="zh" class="privacy-content">
+                <h2>隐私政策</h2>
+                <p>在谷比算力，可从 https://www.gubut.com/ 访问，我们的一项主要优先事项是访问者的隐私。本隐私政策文件包含谷比算力收集和记录的信息类型以及我们如何使用它。</p>
+                <p>如果您对我们的隐私政策有其他问题或需要更多信息，请随时联系我们。</p>
+                <p>本隐私政策仅适用于我们的在线活动，对于通过谷比算力网站共享和/或收集信息的访问者有效。本政策不适用于通过此网站以外的渠道收集的任何离线或其他信息。</p>
+                
+                <h2>同意</h2>
+                <p>使用我们的网站即表示您同意我们的隐私政策并同意其条款。</p>
+                
+                <h2>我们收集的信息</h2>
+                <p>您被要求提供的个人信息，以及要求您提供这些信息的原因，将在我们要求您提供个人信息时向您说明。</p>
+                <p>如果您直接与我们联系，我们可能会收到有关您的其他信息，例如您的姓名、电子邮件地址、电话号码、您可能发送给我们的消息和/或附件的内容，以及您可能选择提供的任何其他信息。</p>
+                <p>当您注册账户时，我们可能会要求您提供联系信息，包括姓名、公司名称、地址、电子邮件地址和电话号码等项目。</p>
+                
+                <h2>我们如何使用您的信息</h2>
+                <p>我们以各种方式使用收集到的信息，包括：</p>
+                <ul>
+                    <li>提供、运营和维护我们的网站</li>
+                    <li>改进、个性化和扩展我们的网站</li>
+                    <li>了解和分析您如何使用我们的网站</li>
+                    <li>开发新产品、服务、功能和功能</li>
+                    <li>与您沟通，无论是直接还是通过我们的合作伙伴，包括客户服务，为您提供与网站相关的更新和其他信息，以及用于营销和促销目的</li>
+                    <li>给您发送电子邮件</li>
+                    <li>发现和防止欺诈</li>
+                </ul>
+                
+                <h2>日志文件</h2>
+                <p>谷比算力遵循使用日志文件的标准程序。这些文件在访问者访问网站时记录日志。所有托管公司都这样做，这是托管服务分析的一部分。日志文件收集的信息包括互联网协议 (IP) 地址、浏览器类型、互联网服务提供商 (ISP)、日期和时间戳、引用/退出页面，以及可能的点击次数。这些信息不会链接到任何可识别个人身份的信息。这些信息的目的是分析趋势、管理网站、跟踪用户在网站上的移动以及收集人口统计信息。</p>
+                
+                <h2>Cookies 和网络信标</h2>
+                <p>与其他任何网站一样，谷比算力使用"cookies"。这些 cookies 用于存储信息，包括访问者的偏好，以及访问者访问或浏览的网站页面。该信息用于通过根据访问者的浏览器类型和/或其他信息自定义我们的网页内容来优化用户体验。</p>
+                
+                <h2>Google DoubleClick DART Cookie</h2>
+                <p>Google 是我们网站上的第三方供应商之一。它还使用 cookies，称为 DART cookies，根据访问者对 www.website.com 和互联网上其他网站的访问情况向我们的网站访问者提供广告。但是，访问者可以通过访问以下 URL 的 Google 广告和内容网络隐私政策来选择拒绝使用 DART cookies - <a href="https://policies.google.com/technologies/ads">https://policies.google.com/technologies/ads</a></p>
+                
+                <h2>我们的广告合作伙伴</h2>
+                <p>我们网站上的一些广告商可能使用 cookies 和网络信标。我们的广告合作伙伴如下所列。我们的每个广告合作伙伴都有自己的隐私政策，用于其用户数据政策。为了便于访问，我们在下面链接到他们的隐私政策。</p>
+                <ul>
+                    <li>Google: <a href="https://policies.google.com/technologies/ads">https://policies.google.com/technologies/ads</a></li>
+                </ul>
+                
+                <h2>广告合作伙伴隐私政策</h2>
+                <p>您可以查阅此列表以查找谷比算力每个广告合作伙伴的隐私政策。</p>
+                <p>第三方广告服务器或广告网络使用 cookie、JavaScript 或网络信标等技术，这些技术用于其各自广告和链接中，这些广告和链接出现在谷比算力上，直接发送到用户的浏览器。当这种情况发生时，他们会自动接收您的 IP 地址。这些技术用于衡量其广告活动的有效性，和/或个性化您在访问的网站上看到的广告内容。</p>
+                <p>请注意，谷比算力无法访问或控制第三方广告商使用的这些 cookie。</p>
+                
+                <h2>第三方隐私政策</h2>
+                <p>谷比算力的隐私政策不适用于其他广告商或网站。因此，我们建议您查阅这些第三方广告服务器的各自隐私政策以获取更详细的信息。它可能包括他们的做法和关于如何选择退出某些选项的说明。</p>
+                <p>您可以通过您的个人浏览器选项来选择禁用 cookie。要了解有关使用特定 Web 浏览器进行 cookie 管理的更多详细信息，可以在浏览器各自的网站上找到。</p>
+                
+                <h2>CCPA 隐私权（请勿出售我的个人信息）</h2>
+                <p>根据 CCPA，除其他权利外，加州消费者有权：</p>
+                <p>要求收集消费者个人信息的企业披露企业收集的消费者个人信息的类别和具体信息。</p>
+                <p>要求企业删除企业收集的有关消费者的任何个人信息。</p>
+                <p>要求出售消费者个人信息的企业不得出售消费者的个人信息。</p>
+                <p>如果您提出请求，我们有一个月的时间回复您。如果您想行使这些权利中的任何一项，请联系我们。</p>
+                
+                <h2>GDPR 数据保护权</h2>
+                <p>我们希望确保您完全了解您的所有数据保护权利。每个用户都有权享有以下权利：</p>
+                <p>访问权 - 您有权要求获得您的个人数据副本。我们可能会为此服务收取少量费用。</p>
+                <p>更正权 - 您有权要求我们更正您认为不准确的任何信息。您也有权要求我们完善您认为不完整的信息。</p>
+                <p>删除权 - 您有权要求我们在某些条件下删除您的个人数据。</p>
+                <p>限制处理权 - 您有权要求我们在某些条件下限制处理您的个人数据。</p>
+                <p>反对处理权 - 您有权反对我们在某些条件下处理您的个人数据。</p>
+                <p>数据可携权 - 您有权要求我们将收集的数据转移给另一个组织，或直接转移给您，某些条件下。</p>
+                <p>如果您提出请求，我们有一个月的时间回复您。如果您想行使这些权利中的任何一项，请联系我们。</p>
+                
+                <h2>儿童信息</h2>
+                <p>我们的另一个优先事项是在使用互联网时为儿童增加保护。我们鼓励父母和监护人观察、参与和/或监督和指导他们的在线活动。</p>
+                <p>谷比算力不会故意从 13 岁以下的儿童那里收集任何个人身份信息。如果您认为您的孩子在我们的网站上提供了此类信息，我们强烈建议您立即联系我们，我们将尽最大努力迅速从我们的记录中删除此类信息。</p>
+            </div>
+            
+            <div data-lang="en" class="privacy-content hidden-lang">
+                <h2>Privacy Policy for Gubi Computing</h2>
+                <p>At Gubi Computing, accessible from https://www.gubut.com/, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Gubi Computing and how we use it.</p>
+                <p>If you have additional questions or require more information about our Privacy Policy, do not hesitate to contact us.</p>
+                <p>This Privacy Policy applies only to our online activities and is valid for visitors to our website with regards to the information that they shared and/or collect in Gubi Computing. This policy is not applicable to any information collected offline or via channels other than this website.</p>
+                
+                <h2>Consent</h2>
+                <p>By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
+                
+                <h2>Information we collect</h2>
+                <p>The personal information that you are asked to provide, and the reasons why you are asked to provide it, will be made clear to you at the point we ask you to provide your personal information.</p>
+                <p>If you contact us directly, we may receive additional information about you such as your name, email address, phone number, the contents of the message and/or attachments you may send us, and any other information you may choose to provide.</p>
+                <p>When you register for an Account, we may ask for your contact information, including items such as name, company name, address, email address, and telephone number.</p>
+                
+                <h2>How we use your information</h2>
+                <p>We use the information we collect in various ways, including to:</p>
+                <ul>
+                    <li>Provide, operate, and maintain our website</li>
+                    <li>Improve, personalize, and expand our website</li>
+                    <li>Understand and analyze how you use our website</li>
+                    <li>Develop new products, services, features, and functionality</li>
+                    <li>Communicate with you, either directly or through one of our partners, including for customer service, to provide you with updates and other information relating to the website, and for marketing and promotional purposes</li>
+                    <li>Send you emails</li>
+                    <li>Find and prevent fraud</li>
+                </ul>
+                
+                <h2>Log Files</h2>
+                <p>Gubi Computing follows a standard procedure of using log files. These files log visitors when they visit websites. All hosting companies do this and a part of hosting services analytics. The information collected by log files include internet protocol (IP) addresses, browser type, Internet Service Provider (ISP), date and time stamp, referring/exit pages, and possibly the number of clicks. These are not linked to any information that is personally identifiable. The purpose of the information is for analyzing trends, administering the site, tracking users movement on the website, and gathering demographic information.</p>
+                
+                <h2>Cookies and Web Beacons</h2>
+                <p>Like any other website, Gubi Computing uses "cookies". These cookies are used to store information including visitors preferences, and the pages on the website that the visitor accessed or visited. The information is used to optimize the users experience by customizing our web page content based on visitors browser type and/or other information.</p>
+                
+                <h2>Google DoubleClick DART Cookie</h2>
+                <p>Google is one of a third-party vendor on our site. It also uses cookies, known as DART cookies, to serve ads to our site visitors based upon their visit to www.website.com and other sites on the internet. However, visitors may choose to decline the use of DART cookies by visiting the Google ad and content network Privacy Policy at the following URL – <a href="https://policies.google.com/technologies/ads">https://policies.google.com/technologies/ads</a></p>
+                
+                <h2>Our Advertising Partners</h2>
+                <p>Some of advertisers on our site may use cookies and web beacons. Our advertising partners are listed below. Each of our advertising partners has their own Privacy Policy for their policies on user data. For easier access, we hyperlinked to their Privacy Policies below.</p>
+                <ul>
+                    <li>Google: <a href="https://policies.google.com/technologies/ads">https://policies.google.com/technologies/ads</a></li>
+                </ul>
+                
+                <h2>Advertising Partners Privacy Policies</h2>
+                <p>You may consult this list to find the Privacy Policy for each of the advertising partners of Gubi Computing.</p>
+                <p>Third-party ad servers or ad networks uses technologies like cookies, JavaScript, or Web Beacons that are used in their respective advertisements and links that appear on Gubi Computing, which are sent directly to users browser. They automatically receive your IP address when this occurs. These technologies are used to measure the effectiveness of their advertising campaigns and/or to personalize the advertising content that you see on websites that you visit.</p>
+                <p>Note that Gubi Computing has no access to or control over these cookies that are used by third-party advertisers.</p>
+                
+                <h2>Third Party Privacy Policies</h2>
+                <p>Gubi Computing's Privacy Policy does not apply to other advertisers or websites. Thus, we are advising you to consult the respective Privacy Policies of these third-party ad servers for more detailed information. It may include their practices and instructions about how to opt-out of certain options.</p>
+                <p>You can choose to disable cookies through your individual browser options. To know more detailed information about cookie management with specific web browsers, it can be found at the browsers respective websites.</p>
+                
+                <h2>CCPA Privacy Rights (Do Not Sell My Personal Information)</h2>
+                <p>Under the CCPA, among other rights, California consumers have the right to:</p>
+                <p>Request that a business that collects a consumer's personal data disclose the categories and specific pieces of personal data that a business has collected about consumers.</p>
+                <p>Request that a business delete any personal data about the consumer that a business has collected.</p>
+                <p>Request that a business that sells a consumer's personal data, not sell the consumer's personal data.</p>
+                <p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.</p>
+                
+                <h2>GDPR Data Protection Rights</h2>
+                <p>We would like to make sure you are fully aware of all of your data protection rights. Every user is entitled to the following:</p>
+                <p>The right to access – You have the right to request copies of your personal data. We may charge you a small fee for this service.</p>
+                <p>The right to rectification – You have the right to request that we correct any information you believe is inaccurate. You also have the right to request that we complete the information you believe is incomplete.</p>
+                <p>The right to erasure – You have the right to request that we erase your personal data, under certain conditions.</p>
+                <p>The right to restrict processing – You have the right to request that we restrict the processing of your personal data, under certain conditions.</p>
+                <p>The right to object to processing – You have the right to object to our processing of your personal data, under certain conditions.</p>
+                <p>The right to data portability – You have the right to request that we transfer the data that we have collected to another organization, or directly to you, under certain conditions.</p>
+                <p>If you make a request, we have one month to respond to you. If you would like to exercise any of these rights, please contact us.</p>
+                
+                <h2>Children's Information</h2>
+                <p>Another part of our priority is adding protection for children while using the internet. We encourage parents and guardians to observe, participate in, and/or monitor and guide their online activity.</p>
+                <p>Gubi Computing does not knowingly collect any Personal Identifiable Information from children under the age of 13. If you think that your child provided this kind of information on our website, we strongly encourage you to contact us immediately and we will do our best efforts to promptly remove such information from our records.</p>
+            </div>
+        </article>
+    </div>
+
+    <!-- 数据信号服务板块 -->
+    <section class="py-8 min-h-[20vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-700 text-white">
+        <div class="container mx-auto px-2 sm:px-6 lg:px-8 w-full">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4" data-lang-key="signals.title">
+                    数据信号服务
+                </h2>
+                <p class="text-blue-100 text-lg" data-lang-key="signals.subtitle">
+                    快人一步的行情数据，让你在别人还没反应时，就已经进场
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🔔</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.new.title">
+                        新币上线提醒
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.new.desc">
+                        第一时间获取新币上线信息，抢占先机
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🚀</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.market.title">
+                        市场异动推送
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.market.desc">
+                        实时推送资金流异常、盘口深度变化等关键信号
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">💎</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.vip.title">
+                        VIP社群服务
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.vip.desc">
+                        加入专属社群，获取全部信号和深度指标
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn">
+                    免费获取信号
+                </a>
+            </div>
+        </div>
+    </section>
+    <!-- 底部 -->
+    <footer class="bg-gray-900 text-gray-400 py-10 border-t border-gray-800">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <p class="text-sm" data-lang-key="footer.copyright">© 2024 谷比算力. 版权所有.</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="privacy.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.privacy">隐私政策</a>
+                    <a href="terms.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.terms">使用条款</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.contact">联系我们</a>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm" data-lang-key="footer.risk">
+                风险提示：加密货币交易具有高风险，请谨慎投资
+            </div>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 页面加载完成后执行额外的初始化操作
+        document.addEventListener('DOMContentLoaded', function() {
+            // 监听语言切换事件
+            document.addEventListener('languageChanged', function(e) {
+                console.log('Language changed to:', e.detail.language);
+                // 这里可以添加语言切换后的额外处理逻辑
+            });
+            
+            // 导航栏滚动效果
+            const navbar = document.querySelector('.navbar');
+            
+            if (navbar) {
+                // 初始检查页面滚动位置
+                checkScrollPosition();
+                
+                // 监听滚动事件
+                window.addEventListener('scroll', function() {
+                    checkScrollPosition();
+                });
+                
+                function checkScrollPosition() {
+                    if (window.scrollY > 20) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                }
+            }
+        });
+    </script>
+    </body>
+</html>

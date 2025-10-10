@@ -1,0 +1,8 @@
+{
+  "users": {
+    "admin": {
+      "password": "win61585@",
+      "role": "administrator"
+    }
+  }
+}

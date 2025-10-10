@@ -1,0 +1,14 @@
+{
+  "siteName": "谷比算力",
+  "logo": "./img/logo.png",
+  "keywords": "区块链, 算力, 量化交易, 策略开发, 加密货币",
+  "description": "谷比算力 - 专注于区块链技术与量化交易策略的专业平台",
+  "social": {
+    "telegram": "https://t.me/gubitrade",
+    "twitter": "https://twitter.com/gubitrade"
+  },
+  "seo": {
+    "title": "谷比算力 - 区块链与量化交易专家",
+    "metaDescription": "谷比算力提供专业的区块链技术支持、量化交易策略开发与数据分析服务。"
+  }
+}

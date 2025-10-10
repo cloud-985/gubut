@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>后台管理 - 谷比算力</title>
+    <meta name="description" content="谷比算力管理后台">
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- 引入语言切换组件 -->
+    <script src="lang.js"></script>
+        <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#111827',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- 引入TinyMCE (使用公共CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- 引入TinyMCE中文语言包 -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/langs/zh_CN.js" referrerpolicy="origin"></script>
+</head>
+<body>
+
+    <!-- 导航栏 -->
+    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 sm:h-20">
+                <!-- Logo - 点击跳转到首页 -->
+                <a href="index.html" class="flex items-center space-x-2 hover:opacity-90 transition-opacity duration-300">
+                    <img src="img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto" id="siteLogo">
+                    <span class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name" id="siteName">后台管理</span>
+                </a>
+                <!-- 操作按钮 -->
+                <div class="flex items-center space-x-4">
+                    <button class="nav-btn" onclick="showArticleSection()">文章管理</button>
+                    <button class="nav-btn" onclick="showConfigSection()">网站配置</button>
+                    <button id="logoutBtn" class="logout-btn">登出</button>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="admin-container">
+        <!-- 登录表单 -->
+        <div id="loginSection" class="admin-section">
+            <h2>管理员登录</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">用户名:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="submit-btn">登录</button>
+            </form>
+        </div>
+
+        <!-- 网站配置管理 -->
+        <div id="configSection" class="admin-section" style="display: none;">
+            <h2>网站配置</h2>
+            <form id="configForm">
+                <div class="form-group">
+                    <label for="siteName">网站名称:</label>
+                    <input type="text" id="siteName" required>
+                </div>
+                <div class="form-group">
+                    <label for="logoUpload">Logo上传:</label>
+                    <input type="file" id="logoUpload" accept="image/*" class="mb-2">
+                    <input type="hidden" id="logo" required>
+                    <div id="logoPreview" class="mt-2">
+                        <img id="logoImage" src="" alt="Logo预览" style="max-width: 200px; max-height: 100px; display: none;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="keywords">关键词:</label>
+                    <input type="text" id="keywords" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">网站描述:</label>
+                    <textarea id="description" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="telegram">Telegram链接:</label>
+                    <input type="text" id="telegram" required>
+                </div>
+                <div class="form-group">
+                    <label for="twitter">X (Twitter)链接:</label>
+                    <input type="text" id="twitter" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">保存配置</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 文章管理 -->
+        <div id="articleSection" class="admin-section" style="display: none;">
+
+            <h2>发布文章</h2>
+
+            <form id="articleForm">
+                <div class="form-group">
+                    <label for="title">文章标题:</label>
+                    <input type="text" id="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">文章内容:</label>
+                    <textarea name="content" id="content" rows="15"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">发布文章</button>
+                    <button type="button" id="cancelEdit" class="cancel-btn">取消编辑</button>
+                </div>
+            </form>
+            
+            <div class="articles-list">
+                <ul id="articlesList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化TinyMCE编辑器
+        tinymce.init({
+            selector: '#content',
+            language: 'zh_CN',
+            plugins: 'image link lists media code table',
+            toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | table | code',
+            menubar: false,
+            height: 500,
+            width: '100%',
+            statusbar: false,
+            resize: true,
+            branding: false,
+            promotion: false,
+            toolbar_mode: 'sliding',
+            quickbars_selection_toolbar: 'bold italic | quicklink h2 h3 blockquote',
+            contextmenu: 'undo redo | link image table',
+            image_caption: true,
+            image_advtab: true,
+            image_uploadtab: true,
+            images_upload_url: '/api/upload-image', // 设置图片上传的URL
+            images_upload_handler: function (blobInfo, progress) {
+                return new Promise(function(resolve, reject) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/api/upload-image');
+                    
+                    xhr.upload.onprogress = function (e) {
+                        progress(e.loaded / e.total * 100);
+                    };
+                    
+                    xhr.onload = function() {
+                        if (xhr.status === 403) {
+                            reject({message: "HTTP Error: 403", remove: true});
+                            return;
+                        }
+                        
+                        if (xhr.status < 200 || xhr.status >= 300) {
+                            reject("HTTP Error: " + xhr.status);
+                            return;
+                        }
+                        
+                        const json = JSON.parse(xhr.responseText);
+                        
+                        if (!json || typeof json.location != 'string') {
+                            reject("Invalid JSON: " + xhr.responseText);
+                            return;
+                        }
+                        
+                        resolve(json.location);
+                    };
+                    
+                    xhr.onerror = function() {
+                        reject('Image upload failed due to a network error');
+                    };
+                    
+                    const formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    
+                    xhr.send(formData);
+                });
+            },
+            // 添加表格插件配置
+            table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+            // 添加媒体插件配置
+            media_live_embeds: true,
+            media_poster: false,
+            // 添加setup函数处理初始化完成事件
+            setup: function(editor) {
+                editor.on('init', function() {
+                    // 确保编辑器初始化完成后可以正常获取焦点
+                    console.log('TinyMCE编辑器初始化完成');
+                    // 在TinyMCE 6中，使用不同的方式处理模式
+                    if (editor.mode) {
+                        try {
+                            // 尝试强制激活编辑区域
+                            editor.focus();
+                        } catch (e) {
+                            console.log('无法设置编辑器焦点:', e);
+                        }
+                    }
+                });
+            }
+        });
+
+        // 添加取消编辑按钮事件处理
+        document.getElementById('cancelEdit').addEventListener('click', function() {
+            // 重置表单
+            document.getElementById('articleForm').reset();
+            delete document.getElementById('articleForm').dataset.editId;
+            document.querySelector('#articleForm button[type="submit"]').textContent = '发布文章';
+            document.getElementById('cancelEdit').style.display = 'none';
+            tinymce.get('content').setContent('');
+            
+            // 让编辑器获得焦点
+            tinymce.get('content').focus();
+            
+            alert('已取消编辑');
+        });
+
+        // 用户数据（从配置文件加载）
+        let users = {};
+
+        // 页面加载时从配置文件加载用户数据
+        window.addEventListener('DOMContentLoaded', function() {
+            fetch('users.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('无法加载用户配置文件');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    users = data.users || {};
+                })
+                .catch(error => {
+                    console.error('加载用户配置失败:', error);
+                    // 如果加载失败，使用默认用户
+                    users = {
+                        "admin": {
+                            "password": "123456",
+                            "role": "administrator"
+                        }
+                    };
+                });
+        });
+
+        // 检查是否已登录
+        window.onload = function() {
+            if (localStorage.getItem('loggedIn') === 'true') {
+                showArticleSection();
+                loadArticles();
+            }
+        };
+
+        // 登录表单提交
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // 检查用户是否存在且密码正确
+            if (users[username] && users[username].password === password) {
+                localStorage.setItem('loggedIn', 'true');
+                localStorage.setItem('currentUser', username);
+                localStorage.setItem('userRole', users[username].role || 'user');
+                showArticleSection();
+                loadArticles();
+            } else {
+                alert('用户名或密码错误');
+            }
+        });
+
+        // 文章表单提交
+        document.getElementById('articleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value.trim();
+            // 获取TinyMCE编辑器的内容
+            const content = tinymce.get('content').getContent();
+            
+            // 验证标题和内容
+            if (!title) {
+                alert('请输入文章标题');
+                document.getElementById('title').focus();
+                return;
+            }
+            
+            if (!content || content.trim() === '<p><br></p>') {
+                alert('请输入文章内容');
+                tinymce.get('content').focus();
+                return;
+            }
+            
+            // 检查是否处于编辑模式
+            const editId = this.dataset.editId;
+            
+            // 生成文章ID（编辑模式使用现有ID）
+            const articleId = editId ? parseInt(editId) : Date.now();
+            
+            // 创建文章数据
+            const article = {
+                id: articleId,
+                title: title,
+                content: content,
+                date: new Date().toLocaleString('zh-CN')
+            };
+            
+            if (editId) {
+                // 更新文章
+                updateArticle(article);
+                
+                // 重置表单
+                document.getElementById('articleForm').reset();
+                delete this.dataset.editId;
+                document.querySelector('#articleForm button[type="submit"]').textContent = '发布文章';
+                document.getElementById('cancelEdit').style.display = 'none';
+                tinymce.get('content').setContent('');
+                
+                // 重新加载文章列表
+                loadArticles();
+                
+                alert('文章更新成功！');
+            } else {
+                // 保存新文章
+                saveArticle(article);
+                
+                // 重置表单
+                document.getElementById('articleForm').reset();
+                tinymce.get('content').setContent('');
+                
+                // 重新加载文章列表
+                loadArticles();
+                
+                // 提示用户文章发布成功
+                alert('文章发布成功！');
+            }
+        });
+
+        // 显示文章管理界面
+        function showArticleSection() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('articleSection').style.display = 'block';
+            document.getElementById('configSection').style.display = 'none';
+        }
+        
+        // 显示网站配置界面
+        function showConfigSection() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('articleSection').style.display = 'none';
+            document.getElementById('configSection').style.display = 'block';
+            loadSiteConfig();
+        }
+
+        // 保存文章
+        function saveArticle(article) {
+            // 直接在客户端保存文章到articles.json
+            fetch('/api/save-article', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(article)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('文章保存成功');
+                    // 重新加载文章列表
+                    loadArticles();
+                } else {
+                    console.error('文章保存失败:', data.message);
+                    alert('文章保存失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('保存文章时出错:', error);
+                alert('保存文章时出错: ' + error.message);
+            });
+        }
+
+        // 生成独立文章页面
+        function generateArticlePage(article) {
+            // 调用服务器端API生成文章页面
+            fetch('/api/generate-article', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(article)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('文章页面生成成功');
+                } else {
+                    console.error('文章页面生成失败:', data.message);
+                }
+            })
+            .catch(error => {
+                console.error('生成文章页面时出错:', error);
+            });
+        }
+        
+        // 更新网站地图
+        function updateSitemap() {
+            // 网站地图会在保存/更新/删除文章时自动更新
+            console.log('网站地图将在文章操作后自动更新');
+        }
+
+        // 更新文章
+        function updateArticle(article) {
+            // 直接在客户端更新文章到articles.json
+            fetch('/api/update-article', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(article)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('文章更新成功');
+                    // 重新加载文章列表
+                    loadArticles();
+                } else {
+                    console.error('文章更新失败:', data.message);
+                    alert('文章更新失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('更新文章时出错:', error);
+                alert('更新文章时出错: ' + error.message);
+            });
+        }
+
+        // 加载文章列表
+        function loadArticles() {
+            // 添加性能监控
+            const startTime = Date.now();
+            console.log(`[前端性能监控] 开始加载文章列表: ${startTime}`);
+            
+            // 设置超时时间
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+            
+            // 从服务器获取文章列表
+            fetch('/api/articles', { 
+                signal: controller.signal,
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                const parseTime = Date.now();
+                console.log(`[前端性能监控] 文章列表加载完成，解析耗时: ${parseTime - startTime}ms`);
+                
+                if (data.success && data.articles) {
+                    renderArticles(data.articles);
+                }
+                
+                const renderTime = Date.now();
+                console.log(`[前端性能监控] 文章列表渲染完成，总耗时: ${renderTime - startTime}ms`);
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                console.error('[前端错误] 加载文章列表时出错:', error);
+                
+                if (error.name === 'AbortError') {
+                    alert('加载文章列表超时，请检查网络连接或稍后重试');
+                } else {
+                    alert('加载文章列表时出错，请检查服务器连接');
+                }
+            });
+        }
+        
+        function renderArticles(articles) {
+            const listElement = document.getElementById('articlesList');
+            listElement.innerHTML = '';
+            
+            articles.forEach((article, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="article-info">
+                        <strong>${article.title}</strong>
+                        <span data-lang="zh">发布于: </span><span data-lang="en" style="display: none;">Published: </span>${article.date}
+                    </div>
+                    <div class="article-actions">
+                        <a href="new/article-${article.id}.html" target="_blank">查看</a>
+                        <button class="edit-btn" onclick="editArticle(${article.id})">编辑</button>
+                        <button class="delete-btn" onclick="deleteArticle(${article.id})">删除</button>
+                    </div>
+                `;
+                listElement.appendChild(li);
+            });
+        }
+
+        // 编辑文章
+        function editArticle(articleId) {
+            // 添加性能监控
+            const startTime = Date.now();
+            console.log(`[前端性能监控] 开始加载文章 ID ${articleId}: ${startTime}`);
+            
+            // 设置超时时间
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+            
+            // 通过API获取文章数据
+            fetch(`/api/article/${articleId}`, { 
+                signal: controller.signal,
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('文章未找到');
+                    } else {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                const parseTime = Date.now();
+                console.log(`[前端性能监控] 文章加载完成，解析耗时: ${parseTime - startTime}ms`);
+                
+                if (data.success && data.article) {
+                    fillArticleForm(data.article);
+                } else {
+                    alert('找不到要编辑的文章');
+                }
+                
+                const finishTime = Date.now();
+                console.log(`[前端性能监控] 文章加载和填充完成，总耗时: ${finishTime - startTime}ms`);
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                console.error('[前端错误] 获取文章时出错:', error);
+                
+                if (error.name === 'AbortError') {
+                    alert('加载文章超时，请检查网络连接或稍后重试');
+                } else if (error.message === '文章未找到') {
+                    alert('找不到要编辑的文章');
+                } else {
+                    alert('获取文章时出错，请检查服务器连接');
+                }
+            });
+        }
+        
+        function fillArticleForm(article) {
+            // 填充表单
+            document.getElementById('title').value = article.title;
+            tinymce.get('content').setContent(article.content);
+            
+            // 添加编辑状态标识
+            document.getElementById('articleForm').dataset.editId = article.id;
+            
+            // 修改提交按钮文本
+            document.querySelector('#articleForm button[type="submit"]').textContent = '更新文章';
+            
+            // 显示取消编辑按钮
+            document.getElementById('cancelEdit').style.display = 'inline-block';
+            
+            // 滚动到表单顶部
+            document.getElementById('articleForm').scrollIntoView({ behavior: 'smooth' });
+            
+            alert('您正在编辑文章，请修改后点击"更新文章"按钮保存更改。');
+        }
+
+        // 删除文章
+        function deleteArticle(articleId) {
+            if (confirm('确定要删除这篇文章吗？此操作不可恢复。')) {
+                // 从articles.json中删除文章
+                fetch('/api/delete-article', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: articleId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('文章删除成功');
+                        // 重新加载文章列表
+                        loadArticles();
+                        alert('文章已删除');
+                    } else {
+                        console.error('文章删除失败:', data.message);
+                        alert('文章删除失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('删除文章时出错:', error);
+                    alert('删除文章时出错: ' + error.message);
+                });
+            }
+        }
+        
+        // 添加测试文章按钮（仅用于测试）
+        function createTestArticle() {
+            const testArticle = {
+                id: Date.now(),
+                title: "测试文章",
+                content: "<p>这是一篇测试文章，用于验证文章页面生成功能是否正常工作。</p><p>如果能看到这篇文章，说明文章页面生成功能正常。</p>",
+                date: new Date().toLocaleString('zh-CN')
+            };
+            
+            saveArticle(testArticle);
+            loadArticles();
+            alert("测试文章已创建，请检查new目录下是否生成了对应的HTML文件。");
+        }
+
+        // 页面加载完成后检查是否需要创建测试按钮
+        window.addEventListener('load', function() {
+            // 仅在开发环境中显示测试按钮
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                // 开发环境功能已移除
+            }
+        });
+
+        // 加载网站配置
+        function loadSiteConfig() {
+            fetch('/api/site-config', {
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.config) {
+                    const config = data.config;
+                    document.getElementById('siteName').value = config.siteName || '谷比算力';
+                    document.getElementById('logo').value = config.logo || 'img/logo.png';
+                    document.getElementById('keywords').value = config.keywords || '区块链, 算力, 量化交易, 策略开发, 加密货币';
+                    document.getElementById('description').value = config.description || '谷比算力 - 专注于区块链技术与量化交易策略的专业平台';
+                    document.getElementById('telegram').value = config.social?.telegram || 'https://t.me/gubitrade';
+                    document.getElementById('twitter').value = config.social?.twitter || 'https://twitter.com/gubitrade';
+                    
+                    // 显示logo预览
+                    const logoPath = config.logo || 'img/logo.png';
+                    const logoImage = document.getElementById('logoImage');
+                    logoImage.src = logoPath;
+                    logoImage.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('加载网站配置时出错:', error);
+                alert('加载网站配置时出错: ' + error.message);
+            });
+        }
+        
+        // 添加Logo上传处理
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // 检查文件类型
+            if (!file.type.match('image.*')) {
+                alert('请选择图片文件');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            // 显示上传进度提示
+            alert('正在上传图片，请稍候...');
+            
+            // 使用现有的图片上传API
+            fetch('/api/upload-image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`上传失败: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.location) {
+                    // 保存图片路径到隐藏字段
+                    document.getElementById('logo').value = data.location;
+                    
+                    // 显示图片预览
+                    const logoImage = document.getElementById('logoImage');
+                    logoImage.src = data.location;
+                    logoImage.style.display = 'block';
+                    
+                    alert('图片上传成功！');
+                } else {
+                    throw new Error('上传失败: ' + (data.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('上传Logo时出错:', error);
+                alert('上传Logo时出错: ' + error.message);
+            });
+        });
+        
+        // 保存网站配置
+        document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const config = {
+                siteName: document.getElementById('siteName').value.trim(),
+                logo: document.getElementById('logo').value.trim(),
+                keywords: document.getElementById('keywords').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                social: {
+                    telegram: document.getElementById('telegram').value.trim(),
+                    twitter: document.getElementById('twitter').value.trim()
+                }
+            };
+            
+            // 验证表单
+            if (!config.siteName) {
+                alert('请输入网站名称');
+                document.getElementById('siteName').focus();
+                return;
+            }
+            
+            if (!config.logo) {
+                alert('请上传Logo图片');
+                document.getElementById('logoUpload').focus();
+                return;
+            }
+            
+            fetch('/api/site-config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(config)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('网站配置保存成功');
+                } else {
+                    alert('网站配置保存失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('保存网站配置时出错:', error);
+                alert('保存网站配置时出错: ' + error.message);
+            });
+        });
+        
+        // 添加登出按钮事件处理
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确定要登出吗？')) {
+                    localStorage.removeItem('loggedIn');
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem('userRole');
+                    document.getElementById('loginSection').style.display = 'block';
+                    document.getElementById('articleSection').style.display = 'none';
+                    document.getElementById('loginForm').reset();
+                }
+            });
+        });
+
+    </script>
+    
+    <!-- 加载网站配置 -->
+    <script>
+        // 页面加载完成后加载网站配置
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载网站配置
+            fetch('/api/site-config', {
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.config) {
+                    const config = data.config;
+                    
+                    // 更新网站名称
+                    const siteNameElement = document.getElementById('siteName');
+                    if (siteNameElement && siteNameElement.dataset.langKey === 'site.name') {
+                        siteNameElement.textContent = config.siteName || '后台管理';
+                    }
+                    
+                    // 更新Logo
+                    const logoElement = document.getElementById('siteLogo');
+                    if (logoElement) {
+                        logoElement.src = config.logo || 'img/logo.png';
+                        logoElement.alt = config.siteName || '后台管理';
+                    }
+                    
+                    // 更新页面标题
+                    document.title = `后台管理 - ${config.siteName || '谷比算力'}`;
+                    
+                    // 更新Meta描述
+                    const metaDescription = document.querySelector('meta[name="description"]');
+                    if (metaDescription) {
+                        metaDescription.content = config.description || '谷比算力管理后台';
+                    }
+                }
+            })
+            .catch(error => {
+                console.log('加载网站配置时出错（这是预期行为，如果服务器未就绪）:', error);
+                // 后台页面即使无法加载配置也应该能正常工作，所以不显示错误提示
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
