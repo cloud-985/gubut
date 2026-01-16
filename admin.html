@@ -7,15 +7,11 @@
     <meta name="description" content="谷比算力管理后台">
     <!-- 引入Font Awesome -->
     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <!-- 引入Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 引入样式文件 -->
     <link rel="stylesheet" href="styles.css">
-    <!-- 引入语言切换组件 -->
-    <script src="lang.js"></script>
-        <!-- 自定义配置 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/langs/zh_CN.js" referrerpolicy="origin"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -33,13 +29,8 @@
             }
         }
     </script>
-    <!-- 引入TinyMCE (使用公共CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
-    <!-- 引入TinyMCE中文语言包 -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/langs/zh_CN.js" referrerpolicy="origin"></script>
 </head>
 <body>
-
     <!-- 导航栏 -->
     <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,11 +44,14 @@
                 <div class="flex items-center space-x-4">
                     <button class="nav-btn" onclick="showArticleSection()">文章管理</button>
                     <button class="nav-btn" onclick="showConfigSection()">网站配置</button>
+                    <button class="nav-btn" onclick="showStrategySection()">策略管理</button>
+                    <button class="nav-btn" onclick="showUserSection()">用户管理</button>
                     <button id="logoutBtn" class="logout-btn">登出</button>
                 </div>
             </div>
         </div>
     </header>
+
     <div class="admin-container">
         <!-- 登录表单 -->
         <div id="loginSection" class="admin-section">
@@ -81,7 +75,7 @@
             <form id="configForm">
                 <div class="form-group">
                     <label for="siteName">网站名称:</label>
-                    <input type="text" id="siteName" required>
+
                 </div>
                 <div class="form-group">
                     <label for="logoUpload">Logo上传:</label>
@@ -107,6 +101,35 @@
                     <label for="twitter">X (Twitter)链接:</label>
                     <input type="text" id="twitter" required>
                 </div>
+                <div class="form-group">
+                    <label for="discord">Discord链接:</label>
+                    <input type="text" id="discord" placeholder="Discord链接">
+                </div>
+                <h3>交易所邀请链接</h3>
+                <div class="form-group">
+                    <label for="gateExchange">Gate.io 邀请链接:</label>
+                    <input type="text" id="gateExchange" placeholder="Gate.io 邀请链接">
+                </div>
+                <div class="form-group">
+                    <label for="binanceExchange">Binance 邀请链接:</label>
+                    <input type="text" id="binanceExchange" placeholder="Binance 邀请链接">
+                </div>
+                <div class="form-group">
+                    <label for="okxExchange">OKX 邀请链接:</label>
+                    <input type="text" id="okxExchange" placeholder="OKX 邀请链接">
+                </div>
+                <div class="form-group">
+                    <label for="bitunixExchange">Bitunix 邀请链接:</label>
+                    <input type="text" id="bitunixExchange" placeholder="Bitunix 邀请链接">
+                </div>
+                <div class="form-group">
+                    <label for="xtExchange">XT 邀请链接:</label>
+                    <input type="text" id="xtExchange" placeholder="XT 邀请链接">
+                </div>
+                <div class="form-group">
+                    <label for="bitgetExchange">Bitget 邀请链接:</label>
+                    <input type="text" id="bitgetExchange" placeholder="Bitget 邀请链接">
+                </div>
                 <div class="form-actions">
                     <button type="submit" class="submit-btn">保存配置</button>
                 </div>
@@ -115,9 +138,7 @@
 
         <!-- 文章管理 -->
         <div id="articleSection" class="admin-section" style="display: none;">
-
             <h2>发布文章</h2>
-
             <form id="articleForm">
                 <div class="form-group">
                     <label for="title">文章标题:</label>
@@ -137,12 +158,114 @@
                 <ul id="articlesList"></ul>
             </div>
         </div>
+
+        <!-- 策略管理 -->
+        <div id="strategySection" class="admin-section" style="display: none;">
+            <h2>策略管理</h2>
+            
+            <!-- 添加策略表单 -->
+            <form id="strategyForm">
+                <input type="hidden" id="strategyId">
+                <div class="form-group">
+                    <label for="strategyName">策略名称:</label>
+                    <input type="text" id="strategyName" required>
+                </div>
+                <div class="form-group">
+                    <label for="strategyDescription">策略描述:</label>
+                    <textarea name="strategyDescription" id="strategyDescription"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="strategyExternalUrl">外部链接:</label>
+                    <input type="url" id="strategyExternalUrl" placeholder="https://example.com">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">添加策略</button>
+                    <button type="button" id="cancelStrategyEdit" class="cancel-btn" style="display: none;">取消编辑</button>
+                </div>
+            </form>
+            
+            <!-- 策略列表 -->
+            <div class="articles-list">
+                <div class="flex justify-between items-center mb-4">
+                    <h3>现有策略</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="strategySearchAdmin" placeholder="搜索策略..." class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                        <select id="strategySortAdmin" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                            <option value="newest">最新创建</option>
+                            <option value="oldest">最早创建</option>
+                            <option value="name">按名称</option>
+                        </select>
+                    </div>
+                </div>
+                <ul id="strategiesList"></ul>
+            </div>
+        </div>
+
+        <!-- 用户管理 -->
+        <div id="userSection" class="admin-section" style="display: none;">
+            <h2>用户管理</h2>
+            
+            <!-- 添加用户表单 -->
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <div class="form-group">
+                    <label for="userUsername">用户名:</label>
+                    <input type="text" id="userUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">邮箱:</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="userPassword">密码:</label>
+                    <input type="password" id="userPassword" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">添加用户</button>
+                    <button type="button" id="cancelUserEdit" class="cancel-btn" style="display: none;">取消编辑</button>
+                </div>
+            </form>
+
+            <!-- 用户策略设置表单 -->
+            <div id="userStrategyForm" class="mb-8 p-4 bg-gray-50 rounded-lg" style="display: none;">
+                <h3 class="text-lg font-semibold mb-4">用户策略权限设置</h3>
+                <form id="strategyPermissionForm">
+                    <input type="hidden" id="strategyUserId">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="form-group">
+                            <label for="userStrategyAccess">
+                                <input type="checkbox" id="userStrategyAccess"> 策略访问权限
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="userStrategyExpiry">到期时间:</label>
+                            <input type="datetime-local" id="userStrategyExpiry">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-btn">保存设置</button>
+                        <button type="button" id="cancelStrategyPermission" class="cancel-btn">取消</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 用户列表 -->
+            <div class="articles-list">
+                <div class="mb-4">
+                    <h3>现有用户</h3>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="userSearchAdmin" placeholder="搜索用户..." class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                </div>
+                <ul id="usersList" class="flex flex-wrap gap-4"></ul>
+            </div>
+        </div>
     </div>
 
     <script>
         // 初始化TinyMCE编辑器
         tinymce.init({
-            selector: '#content',
+            selector: '#content, #strategyDescription',
             language: 'zh_CN',
             plugins: 'image link lists media code table',
             toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image media | table | code',
@@ -159,7 +282,7 @@
             image_caption: true,
             image_advtab: true,
             image_uploadtab: true,
-            images_upload_url: '/api/upload-image', // 设置图片上传的URL
+            images_upload_url: '/api/upload-image',
             images_upload_handler: function (blobInfo, progress) {
                 return new Promise(function(resolve, reject) {
                     const xhr = new XMLHttpRequest();
@@ -200,20 +323,14 @@
                     xhr.send(formData);
                 });
             },
-            // 添加表格插件配置
             table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
-            // 添加媒体插件配置
             media_live_embeds: true,
             media_poster: false,
-            // 添加setup函数处理初始化完成事件
             setup: function(editor) {
                 editor.on('init', function() {
-                    // 确保编辑器初始化完成后可以正常获取焦点
                     console.log('TinyMCE编辑器初始化完成');
-                    // 在TinyMCE 6中，使用不同的方式处理模式
                     if (editor.mode) {
                         try {
-                            // 尝试强制激活编辑区域
                             editor.focus();
                         } catch (e) {
                             console.log('无法设置编辑器焦点:', e);
@@ -223,83 +340,134 @@
             }
         });
 
-        // 添加取消编辑按钮事件处理
         document.getElementById('cancelEdit').addEventListener('click', function() {
-            // 重置表单
             document.getElementById('articleForm').reset();
             delete document.getElementById('articleForm').dataset.editId;
             document.querySelector('#articleForm button[type="submit"]').textContent = '发布文章';
             document.getElementById('cancelEdit').style.display = 'none';
             tinymce.get('content').setContent('');
-            
-            // 让编辑器获得焦点
             tinymce.get('content').focus();
-            
             alert('已取消编辑');
         });
 
-        // 用户数据（从配置文件加载）
         let users = {};
 
-        // 页面加载时从配置文件加载用户数据
-        window.addEventListener('DOMContentLoaded', function() {
-            fetch('users.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('无法加载用户配置文件');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    users = data.users || {};
-                })
-                .catch(error => {
-                    console.error('加载用户配置失败:', error);
-                    // 如果加载失败，使用默认用户
-                    users = {
-                        "admin": {
-                            "password": "123456",
-                            "role": "administrator"
+        // Load users from API
+        function loadUsers() {
+            // 确保总是返回一个Promise
+            return new Promise((resolve, reject) => {
+                fetch('/api/users')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('无法加载用户列表');
                         }
-                    };
-                });
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data && data.success && data.users) {
+                            // Transform array of users to object with usernames as keys
+                            users = {};
+                            data.users.forEach(user => {
+                                users[user.username] = {
+                                    id: user.id,
+                                    password: user.password,
+                                    password_hash: user.password_hash,
+                                    email: user.email,
+                                    role: user.role
+                                };
+                            });
+                            resolve(users);
+                        } else {
+                            users = {};
+                            resolve(users);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('加载用户配置失败:', error);
+                        users = {};
+                        reject(error);
+                    });
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            loadUsers().then(() => {
+                // Users loaded
+            }).catch(() => {
+                // Error loading users
+            });
         });
 
-        // 检查是否已登录
         window.onload = function() {
-            if (localStorage.getItem('loggedIn') === 'true') {
-                showArticleSection();
-                loadArticles();
+            // 检查用户是否已登录
+            if (localStorage.getItem('loggedIn') !== 'true') {
+                // 如果未登录，显示登录界面并隐藏其他所有部分
+                document.getElementById('loginSection').style.display = 'block';
+                hideAllSectionsExcept(['loginSection']);
+                return;
             }
+            
+            showArticleSection();
+            loadArticles();
         };
 
-        // 登录表单提交
+        // 添加一个检查登录状态的函数
+        function checkLoginStatus() {
+            if (localStorage.getItem('loggedIn') !== 'true') {
+                // 未登录，重定向到登录界面
+                document.getElementById('loginSection').style.display = 'block';
+                hideAllSectionsExcept(['loginSection']);
+                return false;
+            }
+            return true;
+        }
+
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // 检查用户是否存在且密码正确
-            if (users[username] && users[username].password === password) {
-                localStorage.setItem('loggedIn', 'true');
-                localStorage.setItem('currentUser', username);
-                localStorage.setItem('userRole', users[username].role || 'user');
-                showArticleSection();
-                loadArticles();
-            } else {
-                alert('用户名或密码错误');
-            }
+            // Login using the API endpoint
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    localStorage.setItem('loggedIn', 'true');
+                    localStorage.setItem('currentUser', username);
+                    localStorage.setItem('userRole', data.user.role || 'user');
+                    showArticleSection();
+                    loadArticles();
+                    
+                    // 触发用户状态变更事件
+                    document.dispatchEvent(new CustomEvent('userStateChange'));
+                } else {
+                    alert(data.message || '用户名或密码错误');
+                }
+            })
+            .catch(error => {
+                console.error('登录时出错:', error);
+                alert('系统错误，请检查控制台了解详细信息');
+            });
         });
 
-        // 文章表单提交
         document.getElementById('articleForm').addEventListener('submit', function(e) {
+            // 检查登录状态
+            if (!checkLoginStatus()) {
+                e.preventDefault();
+                return;
+            }
+            
             e.preventDefault();
             
             const title = document.getElementById('title').value.trim();
-            // 获取TinyMCE编辑器的内容
             const content = tinymce.get('content').getContent();
             
-            // 验证标题和内容
             if (!title) {
                 alert('请输入文章标题');
                 document.getElementById('title').focus();
@@ -312,13 +480,9 @@
                 return;
             }
             
-            // 检查是否处于编辑模式
             const editId = this.dataset.editId;
-            
-            // 生成文章ID（编辑模式使用现有ID）
             const articleId = editId ? parseInt(editId) : Date.now();
             
-            // 创建文章数据
             const article = {
                 id: articleId,
                 title: title,
@@ -327,54 +491,83 @@
             };
             
             if (editId) {
-                // 更新文章
                 updateArticle(article);
-                
-                // 重置表单
                 document.getElementById('articleForm').reset();
                 delete this.dataset.editId;
                 document.querySelector('#articleForm button[type="submit"]').textContent = '发布文章';
                 document.getElementById('cancelEdit').style.display = 'none';
                 tinymce.get('content').setContent('');
-                
-                // 重新加载文章列表
                 loadArticles();
-                
                 alert('文章更新成功！');
             } else {
-                // 保存新文章
                 saveArticle(article);
-                
-                // 重置表单
                 document.getElementById('articleForm').reset();
                 tinymce.get('content').setContent('');
-                
-                // 重新加载文章列表
                 loadArticles();
-                
-                // 提示用户文章发布成功
                 alert('文章发布成功！');
             }
         });
 
-        // 显示文章管理界面
         function showArticleSection() {
-            document.getElementById('loginSection').style.display = 'none';
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            hideAllSections();
             document.getElementById('articleSection').style.display = 'block';
-            document.getElementById('configSection').style.display = 'none';
+            loadArticles();
         }
         
-        // 显示网站配置界面
         function showConfigSection() {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('articleSection').style.display = 'none';
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            hideAllSections();
             document.getElementById('configSection').style.display = 'block';
             loadSiteConfig();
         }
 
-        // 保存文章
+        function showStrategySection() {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            hideAllSections();
+            document.getElementById('strategySection').style.display = 'block';
+            loadStrategies();
+        }
+        
+        function showUserSection() {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            hideAllSections();
+            document.getElementById('userSection').style.display = 'block';
+            loadUsersForDisplay();
+        }
+
+        function hideAllSectionsExcept(exceptions = []) {
+            const sections = ['loginSection', 'articleSection', 'configSection', 'strategySection', 'userSection'];
+            sections.forEach(sectionId => {
+                // Skip sections that should not be hidden
+                if (exceptions.includes(sectionId)) return;
+                
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
+        function hideAllSections() {
+            const sections = ['loginSection', 'articleSection', 'configSection', 'strategySection', 'userSection'];
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.style.display = 'none';
+                }
+            });
+        }
+
         function saveArticle(article) {
-            // 直接在客户端保存文章到articles.json
             fetch('/api/save-article', {
                 method: 'POST',
                 headers: {
@@ -382,11 +575,17 @@
                 },
                 body: JSON.stringify(article)
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应是否为JSON格式
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('服务器返回了非JSON响应');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     console.log('文章保存成功');
-                    // 重新加载文章列表
                     loadArticles();
                 } else {
                     console.error('文章保存失败:', data.message);
@@ -399,9 +598,7 @@
             });
         }
 
-        // 生成独立文章页面
         function generateArticlePage(article) {
-            // 调用服务器端API生成文章页面
             fetch('/api/generate-article', {
                 method: 'POST',
                 headers: {
@@ -409,7 +606,14 @@
                 },
                 body: JSON.stringify(article)
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应是否为JSON格式
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('服务器返回了非JSON响应');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     console.log('文章页面生成成功');
@@ -422,15 +626,11 @@
             });
         }
         
-        // 更新网站地图
         function updateSitemap() {
-            // 网站地图会在保存/更新/删除文章时自动更新
             console.log('网站地图将在文章操作后自动更新');
         }
 
-        // 更新文章
         function updateArticle(article) {
-            // 直接在客户端更新文章到articles.json
             fetch('/api/update-article', {
                 method: 'POST',
                 headers: {
@@ -438,11 +638,17 @@
                 },
                 body: JSON.stringify(article)
             })
-            .then(response => response.json())
+            .then(response => {
+                // 检查响应是否为JSON格式
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('服务器返回了非JSON响应');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     console.log('文章更新成功');
-                    // 重新加载文章列表
                     loadArticles();
                 } else {
                     console.error('文章更新失败:', data.message);
@@ -455,17 +661,13 @@
             });
         }
 
-        // 加载文章列表
         function loadArticles() {
-            // 添加性能监控
             const startTime = Date.now();
             console.log(`[前端性能监控] 开始加载文章列表: ${startTime}`);
             
-            // 设置超时时间
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
             
-            // 从服务器获取文章列表
             fetch('/api/articles', { 
                 signal: controller.signal,
                 headers: {
@@ -523,17 +725,16 @@
             });
         }
 
-        // 编辑文章
         function editArticle(articleId) {
-            // 添加性能监控
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
             const startTime = Date.now();
             console.log(`[前端性能监控] 开始加载文章 ID ${articleId}: ${startTime}`);
             
-            // 设置超时时间
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
             
-            // 通过API获取文章数据
             fetch(`/api/article/${articleId}`, { 
                 signal: controller.signal,
                 headers: {
@@ -579,29 +780,58 @@
         }
         
         function fillArticleForm(article) {
-            // 填充表单
             document.getElementById('title').value = article.title;
             tinymce.get('content').setContent(article.content);
-            
-            // 添加编辑状态标识
             document.getElementById('articleForm').dataset.editId = article.id;
-            
-            // 修改提交按钮文本
             document.querySelector('#articleForm button[type="submit"]').textContent = '更新文章';
-            
-            // 显示取消编辑按钮
             document.getElementById('cancelEdit').style.display = 'inline-block';
-            
-            // 滚动到表单顶部
             document.getElementById('articleForm').scrollIntoView({ behavior: 'smooth' });
-            
             alert('您正在编辑文章，请修改后点击"更新文章"按钮保存更改。');
         }
 
-        // 删除文章
+        function fillStrategyForm(strategy) {
+            document.getElementById('strategyId').value = strategy.id;
+            document.getElementById('strategyName').value = strategy.name;
+            tinymce.get('strategyDescription').setContent(strategy.description || '');
+            document.getElementById('strategyExternalUrl').value = strategy.external_url || '';
+            
+            document.querySelector('#strategyForm button[type="submit"]').textContent = '更新策略';
+            document.getElementById('cancelStrategyEdit').style.display = 'inline-block';
+            document.getElementById('strategyForm').scrollIntoView({ behavior: 'smooth' });
+            alert('您正在编辑策略，请修改后点击"更新策略"按钮保存更改。');
+        }
+
+        function editStrategy(strategyId) {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', window.location.origin + '/api/strategies/' + strategyId, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success && data.strategy) {
+                                fillStrategyForm(data.strategy);
+                                showStrategySection();
+                            }
+                        } catch (e) {
+                            console.error('获取策略时出错:', e);
+                        }
+                    } else {
+                        console.error('获取策略时出错: HTTP状态码 ' + xhr.status);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
         function deleteArticle(articleId) {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
             if (confirm('确定要删除这篇文章吗？此操作不可恢复。')) {
-                // 从articles.json中删除文章
                 fetch('/api/delete-article', {
                     method: 'POST',
                     headers: {
@@ -613,7 +843,6 @@
                 .then(data => {
                     if (data.success) {
                         console.log('文章删除成功');
-                        // 重新加载文章列表
                         loadArticles();
                         alert('文章已删除');
                     } else {
@@ -628,29 +857,11 @@
             }
         }
         
-        // 添加测试文章按钮（仅用于测试）
-        function createTestArticle() {
-            const testArticle = {
-                id: Date.now(),
-                title: "测试文章",
-                content: "<p>这是一篇测试文章，用于验证文章页面生成功能是否正常工作。</p><p>如果能看到这篇文章，说明文章页面生成功能正常。</p>",
-                date: new Date().toLocaleString('zh-CN')
-            };
-            
-            saveArticle(testArticle);
-            loadArticles();
-            alert("测试文章已创建，请检查new目录下是否生成了对应的HTML文件。");
-        }
-
-        // 页面加载完成后检查是否需要创建测试按钮
         window.addEventListener('load', function() {
-            // 仅在开发环境中显示测试按钮
             if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-                // 开发环境功能已移除
             }
         });
 
-        // 加载网站配置
         function loadSiteConfig() {
             fetch('/api/site-config', {
                 headers: {
@@ -667,8 +878,18 @@
                     document.getElementById('description').value = config.description || '谷比算力 - 专注于区块链技术与量化交易策略的专业平台';
                     document.getElementById('telegram').value = config.social?.telegram || 'https://t.me/gubitrade';
                     document.getElementById('twitter').value = config.social?.twitter || 'https://twitter.com/gubitrade';
+                    document.getElementById('discord').value = config.social?.discord || '';
                     
-                    // 显示logo预览
+                    // Load exchange links
+                    if (config.exchanges) {
+                        document.getElementById('gateExchange').value = config.exchanges?.gate || '';
+                        document.getElementById('binanceExchange').value = config.exchanges?.binance || '';
+                        document.getElementById('okxExchange').value = config.exchanges?.okx || '';
+                        document.getElementById('bitunixExchange').value = config.exchanges?.bitunix || '';
+                        document.getElementById('xtExchange').value = config.exchanges?.xt || '';
+                        document.getElementById('bitgetExchange').value = config.exchanges?.bitget || '';
+                    }
+                    
                     const logoPath = config.logo || 'img/logo.png';
                     const logoImage = document.getElementById('logoImage');
                     logoImage.src = logoPath;
@@ -681,12 +902,10 @@
             });
         }
         
-        // 添加Logo上传处理
         document.getElementById('logoUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
             
-            // 检查文件类型
             if (!file.type.match('image.*')) {
                 alert('请选择图片文件');
                 return;
@@ -695,10 +914,8 @@
             const formData = new FormData();
             formData.append('file', file);
             
-            // 显示上传进度提示
             alert('正在上传图片，请稍候...');
             
-            // 使用现有的图片上传API
             fetch('/api/upload-image', {
                 method: 'POST',
                 body: formData
@@ -711,14 +928,10 @@
             })
             .then(data => {
                 if (data.success && data.location) {
-                    // 保存图片路径到隐藏字段
                     document.getElementById('logo').value = data.location;
-                    
-                    // 显示图片预览
                     const logoImage = document.getElementById('logoImage');
                     logoImage.src = data.location;
                     logoImage.style.display = 'block';
-                    
                     alert('图片上传成功！');
                 } else {
                     throw new Error('上传失败: ' + (data.message || '未知错误'));
@@ -730,8 +943,13 @@
             });
         });
         
-        // 保存网站配置
         document.getElementById('configForm').addEventListener('submit', function(e) {
+            // 检查登录状态
+            if (!checkLoginStatus()) {
+                e.preventDefault();
+                return;
+            }
+            
             e.preventDefault();
             
             const config = {
@@ -741,11 +959,19 @@
                 description: document.getElementById('description').value.trim(),
                 social: {
                     telegram: document.getElementById('telegram').value.trim(),
-                    twitter: document.getElementById('twitter').value.trim()
+                    twitter: document.getElementById('twitter').value.trim(),
+                    discord: document.getElementById('discord').value.trim()
+                },
+                exchanges: {
+                    gate: document.getElementById('gateExchange').value.trim(),
+                    binance: document.getElementById('binanceExchange').value.trim(),
+                    okx: document.getElementById('okxExchange').value.trim(),
+                    bitunix: document.getElementById('bitunixExchange').value.trim(),
+                    xt: document.getElementById('xtExchange').value.trim(),
+                    bitget: document.getElementById('bitgetExchange').value.trim()
                 }
             };
             
-            // 验证表单
             if (!config.siteName) {
                 alert('请输入网站名称');
                 document.getElementById('siteName').focus();
@@ -770,7 +996,7 @@
                 if (data.success) {
                     alert('网站配置保存成功');
                 } else {
-                    alert('网站配置保存失败: ' + data.message);
+                    alert('网站配置保存失败: ' + data. Message);
                 }
             })
             .catch(error => {
@@ -779,7 +1005,6 @@
             });
         });
         
-        // 添加登出按钮事件处理
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('logoutBtn').addEventListener('click', function() {
                 if (confirm('确定要登出吗？')) {
@@ -787,19 +1012,594 @@
                     localStorage.removeItem('currentUser');
                     localStorage.removeItem('userRole');
                     document.getElementById('loginSection').style.display = 'block';
-                    document.getElementById('articleSection').style.display = 'none';
+                    hideAllSectionsExcept(['loginSection']);
                     document.getElementById('loginForm').reset();
+                    
+                    // 触发用户状态变更事件
+                    document.dispatchEvent(new CustomEvent('userStateChange'));
                 }
             });
+            
+            // 页面加载时检查登录状态
+            if (localStorage.getItem('loggedIn') !== 'true') {
+                // 如果未登录，隐藏所有管理部分，只显示登录界面
+                hideAllSectionsExcept(['loginSection']);
+            }
+        });
+
+        function loadStrategies() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', window.location.origin + '/api/strategies', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                window.allStrategies = data.strategies;
+                                renderStrategies(data.strategies);
+                            }
+                        } catch (e) {
+                            console.error('加载策略时出错:', e);
+                        }
+                    } else {
+                        console.error('加载策略时出错: HTTP状态码 ' + xhr.status);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        function filterAndSortStrategiesAdmin() {
+            if (!window.allStrategies) return;
+            
+            const searchTerm = document.getElementById('strategySearchAdmin').value.toLowerCase();
+            const sortMethod = document.getElementById('strategySortAdmin').value;
+            
+            let filteredStrategies = window.allStrategies.filter(strategy => 
+                strategy.name.toLowerCase().includes(searchTerm) || 
+                (strategy.description && strategy.description.toLowerCase().includes(searchTerm))
+            );
+            
+            switch(sortMethod) {
+                case 'newest':
+                    filteredStrategies.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+                case 'oldest':
+                    filteredStrategies.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                    break;
+                case 'name':
+                    filteredStrategies.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+            }
+            
+            renderStrategies(filteredStrategies);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('strategySearchAdmin');
+            const sortSelect = document.getElementById('strategySortAdmin');
+            
+            if (searchInput && sortSelect) {
+                searchInput.addEventListener('input', filterAndSortStrategiesAdmin);
+                sortSelect.addEventListener('change', filterAndSortStrategiesAdmin);
+            }
+        });
+
+        function deleteStrategy(strategyId) {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            if (confirm('确定要删除这个策略吗？')) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('DELETE', window.location.origin + '/api/strategies/' + strategyId, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.success) {
+                                    console.log('策略删除成功');
+                                    loadStrategies();
+                                    alert('策略已删除');
+                                } else {
+                                    console.error('策略删除失败:', data.message);
+                                    alert('策略删除失败: ' + data.message);
+                                }
+                            } catch (e) {
+                                console.error('删除策略时出错:', e);
+                                alert('删除策略时出错: ' + e.message);
+                            }
+                        } else {
+                            console.error('删除策略时出错: HTTP状态码 ' + xhr.status);
+                            alert('删除策略时出错: HTTP状态码 ' + xhr.status);
+                        }
+                    }
+                };
+                xhr.send();
+            }
+        }
+
+        document.getElementById('strategyForm').addEventListener('submit', function(e) {
+            // 检查登录状态
+            if (!checkLoginStatus()) {
+                e.preventDefault();
+                return;
+            }
+            
+            e.preventDefault();
+            
+            const strategyId = document.getElementById('strategyId').value;
+            const name = document.getElementById('strategyName').value.trim();
+            const description = tinymce.get('strategyDescription').getContent();
+            const externalUrl = document.getElementById('strategyExternalUrl').value.trim();
+            
+            if (!name) {
+                alert('请输入策略名称');
+                document.getElementById('strategyName').focus();
+                return;
+            }
+            
+            const strategyData = {
+                name: name,
+                description: description,
+                external_url: externalUrl
+            };
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open(strategyId ? 'PUT' : 'POST', window.location.origin + '/api/strategies' + (strategyId ? '/' + strategyId : ''), true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                document.getElementById('strategyForm').reset();
+                                document.getElementById('strategyId').value = '';
+                                // 清空TinyMCE编辑器内容
+                                tinymce.get('strategyDescription').setContent('');
+                                document.querySelector('#strategyForm button[type="submit"]').textContent = '添加策略';
+                                document.getElementById('cancelStrategyEdit').style.display = 'none';
+                                loadStrategies();
+                                alert(strategyId ? '策略更新成功！' : '策略添加成功！');
+                            } else {
+                                alert('操作失败: ' + data.message);
+                            }
+                        } catch (e) {
+                            console.error('保存策略时出错:', e);
+                            alert('保存策略时出错: ' + e.message);
+                        }
+                    } else {
+                        console.error('保存策略时出错: HTTP状态码 ' + xhr.status);
+                        alert('保存策略时出错: HTTP状态码 ' + xhr.status);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(strategyData));
+        });
+
+        document.getElementById('cancelStrategyEdit').addEventListener('click', function() {
+            document.getElementById('strategyForm').reset();
+            document.getElementById('strategyId').value = '';
+            // 清空TinyMCE编辑器内容
+            tinymce.get('strategyDescription').setContent('');
+            document.querySelector('#strategyForm button[type="submit"]').textContent = '添加策略';
+            this.style.display = 'none';
+            alert('已取消编辑');
+        });
+
+        function renderStrategies(strategies) {
+            const listElement = document.getElementById('strategiesList');
+            listElement.innerHTML = '';
+            
+            if (strategies.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'text-center py-4 text-gray-500';
+                li.textContent = '未找到匹配的策略';
+                listElement.appendChild(li);
+                return;
+            }
+            
+            strategies.forEach(strategy => {
+                const li = document.createElement('li');
+                li.className = 'strategy-item';
+                li.innerHTML = `
+                    <div class="article-info">
+                        <strong>${strategy.name}</strong>
+                        <div class="text-sm text-gray-500">
+                            创建于: ${new Date(strategy.created_at).toLocaleDateString('zh-CN')}
+                        </div>
+                    </div>
+                    <div class="article-actions">
+                        ${strategy.external_url ? 
+                          `<a href="${strategy.external_url}" target="_blank" class="edit-btn">启动策略</a>` : 
+                          `<span class="text-gray-400">暂无链接</span>`}
+                        <button class="edit-btn" onclick="editStrategy(${strategy.id})">编辑</button>
+                        <button class="delete-btn" onclick="deleteStrategy(${strategy.id})">删除</button>
+                    </div>
+                `;
+                listElement.appendChild(li);
+            });
+        }
+
+        // 用户管理功能
+        function showUserSection() {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            hideAllSections();
+            document.getElementById('userSection').style.display = 'block';
+            loadUsersForDisplay();
+        }
+
+        function loadUsersForDisplay() {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', window.location.origin + '/api/users', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            renderUsers(data.users);
+                        }
+                    } catch (e) {
+                        console.error('加载用户列表时出错:', e);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        function renderUsers(users) {
+            const listElement = document.getElementById('usersList');
+            listElement.innerHTML = '';
+
+            if (users.length === 0) {
+                const li = document.createElement('li');
+                li.className = 'article-item';
+                li.innerHTML = '<div class="article-info">暂无用户</div>';
+                listElement.appendChild(li);
+                return;
+            }
+
+            users.forEach(user => {
+                // Format strategy access info
+                let strategyAccessText = user.has_strategy_access ? '已开通' : '未开通';
+                let strategyExpiryText = '-';
+                if (user.strategy_expiry) {
+                    strategyExpiryText = new Date(user.strategy_expiry).toLocaleString();
+                } else if (user.has_strategy_access) {
+                    strategyExpiryText = '永久有效';
+                }
+
+                const li = document.createElement('li');
+                li.className = 'article-item bg-white rounded-lg shadow p-4';
+                li.innerHTML = `
+                    <div class="article-info">
+                        <div><strong>ID:</strong> ${user.id}</div>
+                        <div><strong>用户名:</strong> ${user.username}</div>
+                        <div><strong>邮箱:</strong> ${user.email}</div>
+                        <div><strong>策略权限:</strong> ${strategyAccessText}</div>
+                        <div><strong>权限到期:</strong> ${strategyExpiryText}</div>
+                        <div><strong>创建时间:</strong> ${new Date(user.created_at).toLocaleString()}</div>
+                    </div>
+                    <div class="article-actions mt-4">
+                        <button class="edit-btn" onclick="editUser(${user.id})">编辑</button>
+                        <button class="edit-btn" onclick="editUserStrategy(${user.id})">策略设置</button>
+                        <button class="delete-btn" onclick="deleteUser(${user.id})">删除</button>
+                    </div>
+                `;
+                listElement.appendChild(li);
+            });
+        }
+
+        function editUser(userId) {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            // 获取用户信息并填充到表单中
+            loadUsersForDisplay();
+            
+            // Find user in the displayed list
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', window.location.origin + '/api/users', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    try {
+                        const data = JSON.parse(xhr.responseText);
+                        if (data.success) {
+                            const user = data.users.find(u => u.id == userId);
+                            if (user) {
+                                document.getElementById('userId').value = user.id;
+                                document.getElementById('userUsername').value = user.username;
+                                document.getElementById('userEmail').value = user.email;
+                                document.getElementById('userPassword').value = ''; // 不显示密码
+                                document.querySelector('#userForm button[type="submit"]').textContent = '更新用户';
+                                document.getElementById('cancelUserEdit').style.display = 'inline-block';
+                            }
+                        }
+                    } catch (e) {
+                        console.error('获取用户信息时出错:', e);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        // 编辑用户策略权限
+        function editUserStrategy(userId) {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            // 获取用户信息并填充到策略设置表单中
+            fetch(`/api/users/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const user = data.user;
+                        if (user) {
+                            document.getElementById('strategyUserId').value = user.id;
+                            document.getElementById('userStrategyAccess').checked = user.has_strategy_access;
+                            
+                            if (user.strategy_expiry) {
+                                // Format datetime for datetime-local input
+                                const expiryDate = new Date(user.strategy_expiry);
+                                const formattedDate = expiryDate.toISOString().slice(0, 16);
+                                document.getElementById('userStrategyExpiry').value = formattedDate;
+                            } else {
+                                document.getElementById('userStrategyExpiry').value = '';
+                            }
+                            
+                            // Show the strategy form
+                            document.getElementById('userStrategyForm').style.display = 'block';
+                            
+                            // Scroll to the form
+                            document.getElementById('userStrategyForm').scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('获取用户信息时出错:', error);
+                });
+        }
+
+        function deleteUser(userId) {
+            // 检查登录状态
+            if (!checkLoginStatus()) return;
+            
+            if (confirm('确定要删除这个用户吗？')) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('DELETE', window.location.origin + '/api/users/' + userId, true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.success) {
+                                    console.log('用户删除成功');
+                                    loadUsersForDisplay();
+                                    alert('用户已删除');
+                                } else {
+                                    console.error('用户删除失败:', data.message);
+                                    alert('用户删除失败: ' + data.message);
+                                }
+                            } catch (e) {
+                                console.error('删除用户时出错:', e);
+                                alert('删除用户时出错: ' + e.message);
+                            }
+                        } else {
+                            console.error('删除用户时出错: HTTP状态码 ' + xhr.status);
+                            alert('删除用户时出错: HTTP状态码 ' + xhr.status);
+                        }
+                    }
+                };
+                xhr.send();
+            }
+        }
+
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            // 检查登录状态
+            if (!checkLoginStatus()) {
+                e.preventDefault();
+                return;
+            }
+            
+            e.preventDefault();
+            
+            const userId = document.getElementById('userId').value;
+            const username = document.getElementById('userUsername').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const password = document.getElementById('userPassword').value;
+            
+            if (!username) {
+                alert('请输入用户名');
+                document.getElementById('userUsername').focus();
+                return;
+            }
+            
+            if (!email) {
+                alert('请输入邮箱');
+                document.getElementById('userEmail').focus();
+                return;
+            }
+            
+            // 如果是新建用户，必须输入密码
+            if (!userId && !password) {
+                alert('请输入密码');
+                document.getElementById('userPassword').focus();
+                return;
+            }
+            
+            // 如果是新建用户，检查密码长度
+            if (!userId && password.length < 6) {
+                alert('密码长度至少为6位');
+                document.getElementById('userPassword').focus();
+                return;
+            }
+            
+            const userData = {
+                username: username,
+                email: email
+            };
+            
+            // 只有在设置新密码时才发送密码字段
+            if (password) {
+                userData.password = password;
+            }
+            
+            const xhr = new XMLHttpRequest();
+            xhr.open(userId ? 'PUT' : 'POST', window.location.origin + '/api/users' + (userId ? '/' + userId : ''), true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            if (data.success) {
+                                document.getElementById('userForm').reset();
+                                document.getElementById('userId').value = '';
+                                document.querySelector('#userForm button[type="submit"]').textContent = '添加用户';
+                                document.getElementById('cancelUserEdit').style.display = 'none';
+                                loadUsersForDisplay();
+                                alert(userId ? '用户更新成功！' : '用户添加成功！');
+                            } else {
+                                alert('操作失败: ' + data.message);
+                            }
+                        } catch (e) {
+                            console.error('保存用户时出错:', e);
+                            alert('保存用户时出错: ' + e.message);
+                        }
+                    } else {
+                        console.error('保存用户时出错: HTTP状态码 ' + xhr.status);
+                        alert('保存用户时出错: HTTP状态码 ' + xhr.status);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify(userData));
+        });
+
+        // 策略权限设置表单提交
+        document.getElementById('strategyPermissionForm').addEventListener('submit', function(e) {
+            // 检查登录状态
+            if (!checkLoginStatus()) {
+                e.preventDefault();
+                return;
+            }
+            
+            e.preventDefault();
+            
+            const userId = document.getElementById('strategyUserId').value;
+            const hasStrategyAccess = document.getElementById('userStrategyAccess').checked;
+            const strategyExpiry = document.getElementById('userStrategyExpiry').value;
+            
+            // 发送请求到服务器
+            fetch(`/api/users/${userId}/strategy`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    has_strategy_access: hasStrategyAccess,
+                    strategy_expiry: strategyExpiry || null
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('策略权限设置成功');
+                    document.getElementById('userStrategyForm').style.display = 'none';
+                    loadUsers().then(() => {
+                        // Users loaded
+                    }).catch(() => {
+                        // Error loading users
+                    }); // 重新加载用户列表
+                } else {
+                    alert('设置策略权限失败: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('设置策略权限时发生错误');
+            });
+        });
+
+        // 取消策略权限设置
+        document.getElementById('cancelStrategyPermission').addEventListener('click', function() {
+            document.getElementById('userStrategyForm').style.display = 'none';
+        });
+
+        document.getElementById('cancelUserEdit').addEventListener('click', function() {
+            document.getElementById('userForm').reset();
+            document.getElementById('userId').value = '';
+            document.querySelector('#userForm button[type="submit"]').textContent = '添加用户';
+            this.style.display = 'none';
+            alert('已取消编辑');
+        });
+
+        // 搜索功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const userSearchInput = document.getElementById('userSearchAdmin');
+            
+            if (userSearchInput) {
+                userSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const userListItems = document.querySelectorAll('#usersList .article-item');
+                    
+                    userListItems.forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                    });
+                });
+            }
         });
 
     </script>
     
-    <!-- 加载网站配置 -->
     <script>
-        // 页面加载完成后加载网站配置
+        // 添加语言切换监听器
         document.addEventListener('DOMContentLoaded', function() {
-            // 加载网站配置
+            // 监听语言切换事件
+            document.addEventListener('languageChanged', function(e) {
+                console.log('Language changed to:', e.detail.language);
+                // 重新翻译页面内容
+                if (typeof langSwitcher !== 'undefined' && langSwitcher.translatePage) {
+                    setTimeout(() => langSwitcher.translatePage(), 10);
+                }
+                
+                // 自动更新页面特定元素
+                updatePageContent(e.detail.language);
+            });
+        });
+        
+        // 自动更新页面内容
+        function updatePageContent(language) {
+            // 更新页面标题
+            const titleTranslations = {
+                zh: '后台管理 - 谷比算力',
+                en: 'Admin Panel - Gubi Analytics'
+            };
+            
+            document.title = titleTranslations[language] || titleTranslations.zh;
+            
+            // 更新 meta 标签
+            const metaDescription = {
+                zh: '谷比算力管理后台',
+                en: 'Gubi Analytics Admin Panel'
+            };
+            
+            const descriptionMeta = document.querySelector('meta[name="description"]');
+            if (descriptionMeta) {
+                descriptionMeta.setAttribute('content', metaDescription[language] || metaDescription.zh);
+            }
+            
+            // 触发自定义事件，通知其他组件语言已更新
+            document.dispatchEvent(new CustomEvent('pageContentUpdated', {
+                detail: { language: language }
+            }));
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
             fetch('/api/site-config', {
                 headers: {
                     'Cache-Control': 'no-cache'
@@ -809,24 +1609,16 @@
             .then(data => {
                 if (data.success && data.config) {
                     const config = data.config;
-                    
-                    // 更新网站名称
                     const siteNameElement = document.getElementById('siteName');
                     if (siteNameElement && siteNameElement.dataset.langKey === 'site.name') {
                         siteNameElement.textContent = config.siteName || '后台管理';
                     }
-                    
-                    // 更新Logo
                     const logoElement = document.getElementById('siteLogo');
                     if (logoElement) {
                         logoElement.src = config.logo || 'img/logo.png';
                         logoElement.alt = config.siteName || '后台管理';
                     }
-                    
-                    // 更新页面标题
                     document.title = `后台管理 - ${config.siteName || '谷比算力'}`;
-                    
-                    // 更新Meta描述
                     const metaDescription = document.querySelector('meta[name="description"]');
                     if (metaDescription) {
                         metaDescription.content = config.description || '谷比算力管理后台';
@@ -835,12 +1627,8 @@
             })
             .catch(error => {
                 console.log('加载网站配置时出错（这是预期行为，如果服务器未就绪）:', error);
-                // 后台页面即使无法加载配置也应该能正常工作，所以不显示错误提示
             });
         });
     </script>
 </body>
 </html>
-
-
-

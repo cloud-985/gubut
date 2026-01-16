@@ -118,3 +118,53 @@ python -m http.server 3002
 7. 服务器默认运行在端口3002，如需更改请修改server.js文件中的port变量
 8. 在开发环境中，文章页面通过浏览器下载生成；在生产环境中，通过服务器端API自动生成
 9. 服务器端API端点：`POST /api/generate-article`
+
+# Admin Panel User Management
+
+## Managing Admin Users
+
+User credentials are stored in `users.json` file in the root directory. To enhance security, passwords should be stored as hashes rather than plain text.
+
+### Creating Password Hashes
+
+To generate a password hash, use the provided utility script:
+
+```bash
+node generate-hash.js your_password_here
+```
+
+The script will output the hash and show you how to structure the entry in the users.json file.
+
+### Example users.json Structure
+
+```json
+{
+  "users": {
+    "admin": {
+      "password_hash": "-1593206619",
+      "role": "administrator"
+    }
+  }
+}
+```
+
+### Legacy Support
+
+For backward compatibility, the system still supports plain text passwords using the `password` field instead of `password_hash`. However, this is not recommended for security reasons.
+
+```json
+{
+  "users": {
+    "admin": {
+      "password": "plaintext_password",
+      "role": "administrator"
+    }
+  }
+}
+```
+
+## Security Notes
+
+1. Always use `password_hash` instead of `password` in production environments
+2. Store the users.json file securely and restrict access to it
+3. Change default passwords immediately after installation

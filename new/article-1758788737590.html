@@ -37,50 +37,134 @@
     </script>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo - 点击跳转到首页 -->
-                <a href="../index.html" class="flex items-center space-x-2 hover:opacity-90 transition-opacity duration-300">
-                    <img src="../img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto">
-                    <span href="../index.html" class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name">谷比算力</span>
-                </a>
-
-                <!-- 操作按钮 -->
-                <div class="flex items-center space-x-4">
-                    <a href="https://t.me/mevjk_bot" target="_blank" class="hidden md:block px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 font-medium transition-all-300 shadow-md hover:shadow-lg" data-lang-key="btn.start">
-                        立即开始
-                    </a>
-                    <button class="md:hidden px-2 py-1 border border-primary/50 text-primary rounded-md hover:bg-primary/5 transition-colors" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-
-                    <button class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 font-medium transition-all-300" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-        <!-- 悬浮社交按钮 -->
-    <div class="social-floating fixed bottom-24 right-6 z-50 flex flex-col gap-3">
-        <a href="https://t.me/mevjk_bot" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <i class="fa fa-paper-plane text-xl"></i>
-        </a>
-        <a href="https://x.com/gubutdata" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <i class="fa fa-twitter text-xl"></i>
-        </a>
-    </div>
+    <!-- 导航栏占位符 -->
+    <div id="navbar-placeholder"></div>
 
     <div class="article-container">
         <article class="article-content">
             <h1>什么是资金费率套利？一文看懂低风险套利策略</h1>
             <div class="article-meta">
-                <span data-lang="zh">发布于: </span><span data-lang="en" class="hidden-lang">Published: </span>2025-09-25
+                <span data-lang="zh">发布于: </span><span data-lang="en" class="hidden-lang">Published: </span>2025/10/11 16:27:04
             </div>
             <div class="article-body">
-                资金费率套利是一种加密货币衍生品常见的套利方式，主要分为 两种模式：1️⃣ 现货与永续合约之间的套利2️⃣ 不同交易所资金费率之间的套利
+                <div class="article-body">
+<p data-start="133" data-end="213">资金费率套利是一种加密货币衍生品常见的套利方式，主要分为&nbsp;<strong data-start="162" data-end="170">两种模式</strong>：<br data-start="171" data-end="174">1️⃣ 现货与永续合约之间的套利<br data-start="190" data-end="193">2️⃣ 不同交易所资金费率之间的套利</p>
+<p data-start="215" data-end="227">下面带你图文详解👇</p>
+<hr data-start="229" data-end="232">
+<h2 data-start="234" data-end="258">🟢 一、现货与永续合约的资金费率套利</h2>
+<p data-start="260" data-end="311"><strong data-start="260" data-end="266">原理</strong>：<br data-start="267" data-end="270">永续合约的资金费率是多空双方之间定期支付的费用，用来保证合约价格贴近现货价格。</p>
+<ul data-start="312" data-end="365">
+<li data-start="312" data-end="338">
+<p data-start="314" data-end="338">当资金费率为正：做空永续合约 &rarr; 收取资金费</p>
+</li>
+<li data-start="339" data-end="365">
+<p data-start="341" data-end="365">当资金费率为负：做多永续合约 &rarr; 收取资金费</p>
+</li>
+</ul>
+<p data-start="367" data-end="405">因此，通过 <strong data-start="373" data-end="388">现货和永续合约对冲持仓</strong>，就能获得稳定的资金费率收益。</p>
+<p data-start="407" data-end="420">📊 <strong data-start="410" data-end="417">示意图</strong>：</p>
+<div class="contain-inline-size rounded-2xl relative bg-token-sidebar-surface-primary">
+<div class="sticky top-9">
+<div class="absolute end-0 bottom-0 flex h-9 items-center pe-2">&nbsp;</div>
+</div>
+<div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre!">资金费率为正时：  
+买入 BTC 现货 &rarr; 做空 BTC 永续合约 &rarr; 赚取资金费  
+
+资金费率为负时：  
+借币卖出 BTC 现货 &rarr; 做多 BTC 永续合约 &rarr; 赚取资金费  
+</code></div>
+</div>
+<h3 data-start="523" data-end="536">📌 举例说明</h3>
+<p data-start="537" data-end="607">假设 BTC 价格为 <strong data-start="548" data-end="563">20,000 USDT</strong>，资金费率为 <strong data-start="570" data-end="579">0.03%</strong>，你投入 <strong data-start="584" data-end="598">4,000 USDT</strong>，1倍保证金：</p>
+<ol data-start="609" data-end="790">
+<li data-start="609" data-end="636">
+<p data-start="612" data-end="636">买入 2,000 USDT 的 BTC 现货</p>
+</li>
+<li data-start="637" data-end="666">
+<p data-start="640" data-end="666">做空 2,000 USDT 的 BTC 永续合约</p>
+</li>
+<li data-start="667" data-end="717">
+<p data-start="670" data-end="717">每 8 小时资金费收益：<br data-start="682" data-end="685"><code data-start="688" data-end="715">2,000 &times; 0.03% = 0.60 USDT</code></p>
+</li>
+<li data-start="718" data-end="750">
+<p data-start="721" data-end="750">每天收益：<code data-start="726" data-end="748">0.60 &times; 3 = 1.80 USDT</code></p>
+</li>
+<li data-start="751" data-end="790">
+<p data-start="754" data-end="790">年化收益率：<code data-start="760" data-end="788">1.80 &times; 365 &divide; 2000 = 32.95%</code></p>
+</li>
+</ol>
+<p data-start="792" data-end="813">👉 这就是所谓的 <strong data-start="802" data-end="810">正向套利</strong>。</p>
+<hr data-start="815" data-end="818">
+<h2 data-start="820" data-end="842">🔵 二、不同交易所的资金费率套利</h2>
+<p data-start="844" data-end="927"><strong data-start="844" data-end="850">原理</strong>：<br data-start="851" data-end="854">不同交易所的永续合约，资金费率可能差异很大。<br data-start="876" data-end="879">通过在资金费率低的交易所 <strong data-start="892" data-end="898">做多</strong>，在资金费率高的交易所 <strong data-start="910" data-end="916">做空</strong>，即可赚取费率差。</p>
+<p data-start="929" data-end="942">📊 <strong data-start="932" data-end="939">示意图</strong>：</p>
+<div class="contain-inline-size rounded-2xl relative bg-token-sidebar-surface-primary">
+<div class="sticky top-9">
+<div class="absolute end-0 bottom-0 flex h-9 items-center pe-2">&nbsp;</div>
+</div>
+<div class="overflow-y-auto p-4" dir="ltr"><code class="whitespace-pre!">交易所 A：资金费率 <span class="hljs-number">0.04</span><span class="hljs-comment">% &rarr; 做空  </span>
+交易所 B：资金费率 <span class="hljs-number">0.01</span><span class="hljs-comment">% &rarr; 做多  </span>
+差额：<span class="hljs-number">0.03</span><span class="hljs-comment">% &rarr; 套利收益  </span>
+</code></div>
+</div>
+<h3 data-start="1018" data-end="1031">📌 举例说明</h3>
+<ul data-start="1032" data-end="1307">
+<li data-start="1032" data-end="1106">
+<p data-start="1034" data-end="1041">小明发现：</p>
+<ul data-start="1044" data-end="1106">
+<li data-start="1044" data-end="1077">
+<p data-start="1046" data-end="1077">交易所 A 的 BTC 永续资金费率为 <strong data-start="1066" data-end="1075">0.04%</strong></p>
+</li>
+<li data-start="1080" data-end="1106">
+<p data-start="1082" data-end="1106">交易所 B 的资金费率为 <strong data-start="1095" data-end="1104">0.01%</strong></p>
+</li>
+</ul>
+</li>
+<li data-start="1107" data-end="1196">
+<p data-start="1109" data-end="1114">操作：</p>
+<ul data-start="1117" data-end="1196">
+<li data-start="1117" data-end="1154">
+<p data-start="1119" data-end="1154">在 B 做多 1 BTC 永续合约（价格 60,000 USDT）</p>
+</li>
+<li data-start="1157" data-end="1196">
+<p data-start="1159" data-end="1196">在 A 做空 1 BTC 永续合约（价格同为 60,000 USDT）</p>
+</li>
+</ul>
+</li>
+<li data-start="1197" data-end="1307">
+<p data-start="1199" data-end="1307">资金费结算时：<br data-start="1206" data-end="1209">即使 BTC 涨到 61,000 USDT，因对冲关系盈亏抵消，小明还能获得 <strong data-start="1250" data-end="1261">资金费差额收益</strong>：<br data-start="1262" data-end="1265"><code data-start="1267" data-end="1305">61,000 &times; (0.04% - 0.01%) = 18.3 USDT</code></p>
+</li>
+</ul>
+<p data-start="1309" data-end="1329">👉 这就是 <strong data-start="1316" data-end="1326">跨交易所套利</strong>。</p>
+<hr data-start="1331" data-end="1334">
+<h2 data-start="1336" data-end="1354">⚠️ 资金费率套利注意事项</h2>
+<ol data-start="1356" data-end="1538">
+<li data-start="1356" data-end="1403">
+<p data-start="1359" data-end="1403"><strong data-start="1359" data-end="1372">降低杠杆，防止爆仓</strong><br data-start="1372" data-end="1375">即便是对冲策略，也可能因极端行情导致一方爆仓。</p>
+</li>
+<li data-start="1405" data-end="1450">
+<p data-start="1408" data-end="1450"><strong data-start="1408" data-end="1419">选择合适的币种</strong><br data-start="1419" data-end="1422">优先选择流动性好、费率高且持续时间长的主流币。</p>
+</li>
+<li data-start="1452" data-end="1495">
+<p data-start="1455" data-end="1495"><strong data-start="1455" data-end="1467">合理控制资金投入</strong><br data-start="1467" data-end="1470">小币种可能因深度不足产生滑点，影响收益。</p>
+</li>
+<li data-start="1497" data-end="1538">
+<p data-start="1500" data-end="1538"><strong data-start="1500" data-end="1510">避免频繁调仓</strong><br data-start="1510" data-end="1513">高频操作手续费过高，可能抵消资金费收益。</p>
+</li>
+</ol>
+<hr data-start="1540" data-end="1543">
+<h2 data-start="1545" data-end="1554">✅ 总结</h2>
+<p data-start="1556" data-end="1581">资金费率套利看似&ldquo;低风险&rdquo;，但并非&ldquo;无风险&rdquo;：</p>
+<ul data-start="1582" data-end="1621">
+<li data-start="1582" data-end="1597">
+<p data-start="1584" data-end="1597">极端行情下仍有爆仓风险</p>
+</li>
+<li data-start="1598" data-end="1621">
+<p data-start="1600" data-end="1621">需要考虑杠杆利息、手续费、流动性等因素</p>
+</li>
+</ul>
+<p data-start="1623" data-end="1696"><strong data-start="1623" data-end="1633">一句话总结：</strong><br data-start="1633" data-end="1636">👉 资金费率套利 = <strong data-start="1648" data-end="1665">稳定收益 + 严格风险管理</strong>。<br data-start="1666" data-end="1669">只有控制好仓位与交易成本，才能让套利策略真正落地。</p>
+</div>
             </div>
 
             <div class="related-articles">
@@ -147,25 +231,19 @@
             </div>
         </div>
     </section>
-    
-    <!-- 底部 -->
-    <footer class="bg-gray-900 text-gray-400 py-10 border-t border-gray-800">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <p class="text-sm" data-lang-key="footer.copyright">© 2024 谷比算力. 版权所有.</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="../privacy.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.privacy">隐私政策</a>
-                    <a href="../terms.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.terms">使用条款</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.contact">联系我们</a>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm" data-lang-key="footer.risk">
-                风险提示：加密货币交易具有高风险，请谨慎投资
-            </div>
-        </div>
-    </footer>
+
+    <!-- 悬浮社交按钮占位符 -->
+    <div id="social-floating-placeholder"></div>
+
+    <!-- 底部占位符 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 移动端底部导航栏占位符 -->
+    <div id="mobile-navbar-placeholder"></div>
+
+    <!-- 引入组件加载脚本 -->
+    <script src="../js/components.js"></script>
+
     <script>
         // 页面加载完成后获取相关文章
         document.addEventListener('DOMContentLoaded', function() {
@@ -187,7 +265,7 @@
                 
                 // 获取当前文章ID（从URL中提取）
                 const currentUrl = window.location.href;
-                const matchResult = currentUrl.match(/article-(d+).html/);
+                const matchResult = currentUrl.match(/article-(\d+)\.html/);
                 const currentArticleId = matchResult ? matchResult[1] : null;
 
                 // 过滤掉当前文章，并准备显示数据

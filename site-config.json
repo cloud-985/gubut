@@ -4,11 +4,16 @@
   "keywords": "区块链, 算力, 量化交易, 策略开发, 加密货币",
   "description": "谷比算力 - 专注于区块链技术与量化交易策略的专业平台",
   "social": {
-    "telegram": "https://t.me/gubitrade",
-    "twitter": "https://twitter.com/gubitrade"
+    "telegram": "https://t.me/gubutdata",
+    "twitter": "https://x.com/gubutdata",
+    "discord": ""
   },
-  "seo": {
-    "title": "谷比算力 - 区块链与量化交易专家",
-    "metaDescription": "谷比算力提供专业的区块链技术支持、量化交易策略开发与数据分析服务。"
+  "exchanges": {
+    "gate": "https://www.gatenode.cloud/signup/VLURVV9EVG?ref_type=103",
+    "binance": "https://accounts.maxweb.black/register?ref=1090079770",
+    "okx": "https://www.plwebnne.com/join/GUBUT",
+    "bitunix": "https://www.bitunix.com/register?inviteCode=717517",
+    "xt": "https://www.xt.com/zh-CN/accounts/register?ref=ZH9HWY",
+    "bitget": "https://partner.niftah.cn/bg/E7MZJV"
   }
 }

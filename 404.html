@@ -193,12 +193,41 @@
     </div>
     <!-- 悬浮社交按钮 -->
     <div class="social-floating fixed bottom-24 right-6 z-50 flex flex-col gap-3">
-        <a href="https://t.me/mevjk_bot" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="telegramLink2">
-            <i class="fa fa-paper-plane text-xl"></i>
+        <a href="#" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="telegramLink2">
+            <i class="fa fa-envelope text-xl"></i>
         </a>
-        <a href="https://x.com/gubutdata" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="xLink">
-            <i class="fa fa-twitter text-xl"></i>
+        <a href="#" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="xLink">
+            <i class="fa fa-envelope text-xl"></i>
         </a>
+        <a href="/contact.html" class="social-btn discord w-12 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="discordLink">
+            <i class="fa fa-envelope text-xl"></i>
+        </a>
+    </div>
+
+    <!-- 移动端底部导航栏 -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
+        <div class="grid grid-cols-5 gap-1 p-2">
+            <a href="index.html" class="flex flex-col items-center justify-center p-2 text-gray-600 hover:text-primary transition-colors">
+                <i class="fa fa-home text-xl mb-1"></i>
+                <span class="text-xs">首页</span>
+            </a>
+            <a href="index.html#exchanges" class="flex flex-col items-center justify-center p-2 text-gray-600 hover:text-primary transition-colors">
+                <i class="fa fa-exchange text-xl mb-1"></i>
+                <span class="text-xs">交易所</span>
+            </a>
+            <a href="index.html#services" class="flex flex-col items-center justify-center p-2 text-gray-600 hover:text-primary transition-colors">
+                <i class="fa fa-cogs text-xl mb-1"></i>
+                <span class="text-xs">服务</span>
+            </a>
+            <a href="strategy.html" class="flex flex-col items-center justify-center p-2 text-gray-600 hover:text-primary transition-colors">
+                <i class="fa fa-line-chart text-xl mb-1"></i>
+                <span class="text-xs">策略</span>
+            </a>
+            <a href="articles.html" class="flex flex-col items-center justify-center p-2 text-gray-600 hover:text-primary transition-colors">
+                <i class="fa fa-newspaper-o text-xl mb-1"></i>
+                <span class="text-xs">资讯</span>
+            </a>
+        </div>
     </div>
 
     <!-- 数据信号服务板块 -->
@@ -246,7 +275,7 @@
             </div>
 
             <div class="mt-16 text-center">
-                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn" id="telegramLink3">
+                <a href="/contact.html" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn" id="telegramLink3">
                     免费获取信号
                 </a>
             </div>
@@ -271,5 +300,250 @@
             </div>
         </div>
     </footer>
+    
+    <script>
+        // 页面加载完成后添加语言切换监听
+        document.addEventListener('DOMContentLoaded', function() {
+            // 监听语言切换事件
+            document.addEventListener('languageChanged', function(e) {
+                console.log('Language changed to:', e.detail.language);
+                // 重新翻译页面内容
+                if (typeof langSwitcher !== 'undefined' && langSwitcher.translatePage) {
+                    setTimeout(() => langSwitcher.translatePage(), 10);
+                }
+                
+                // 自动更新页面特定元素
+                updatePageContent(e.detail.language);
+            });
+        });
+        
+        // 从后端加载社交配置
+        function loadSocialConfig() {
+            fetch('/api/site-config')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.config && data.config.social) {
+                        const social = data.config.social;
+                        
+                        // 更新Telegram链接
+                        if (social.telegram) {
+                            const telegramLinks = document.querySelectorAll('#telegramLink2, #telegramLink3');
+                            telegramLinks.forEach(link => {
+                                link.href = social.telegram;
+                            });
+                        }
+                        
+                        // 更新Twitter链接
+                        if (social.twitter) {
+                            const xLinks = document.querySelectorAll('#xLink');
+                            xLinks.forEach(link => {
+                                link.href = social.twitter;
+                            });
+                        }
+                        
+                        // 更新Discord显示为文字
+                        if (social.discord) {
+                            const discordElements = document.querySelectorAll('#discordInfo');
+                            discordElements.forEach(element => {
+                                element.textContent = social.discord;
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('加载社交配置失败:', error);
+                });
+        }
+        
+        // 处理语言切换的函数
+        function handleLanguageSwitch(e) {
+            // 阻止默认行为
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            // 获取当前语言（默认为中文）
+            let currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            
+            // 切换语言
+            const newLang = currentLang === 'zh' ? 'en' : 'zh';
+            
+            // 保存新语言到localStorage
+            localStorage.setItem('preferredLanguage', newLang);
+            
+            // 更新HTML语言属性
+            document.documentElement.lang = newLang;
+            
+            // 触发语言即将切换事件
+            document.dispatchEvent(new CustomEvent('languageWillChange', {
+                detail: { language: newLang }
+            }));
+            
+            // 更新按钮文本
+            const langBtnTexts = document.querySelectorAll('[data-lang-btn-text]');
+            langBtnTexts.forEach(element => {
+                element.textContent = newLang === 'zh' ? 'EN' : '中文';
+            });
+            
+            // 直接进行翻译
+            performTranslation(newLang);
+            
+            // 触发语言切换事件
+            document.dispatchEvent(new CustomEvent('languageChanged', {
+                detail: { language: newLang }
+            }));
+            
+            // 重置标志
+            setTimeout(() => {
+                window.isLanguageSwitching = false;
+            }, 100);
+        }
+
+        function performTranslation(language) {
+            // 使用LanguageSwitcher类中定义的翻译映射
+            const translations = langSwitcher.translations;
+            
+            // 翻译所有带 data-lang-key 属性的元素
+            const elements = document.querySelectorAll('[data-lang-key]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[language] && translations[language][key]) {
+                    element.textContent = translations[language][key];
+                }
+            });
+            
+            // 特殊处理关键元素
+            const siteNameElement = document.getElementById('siteName');
+            if (siteNameElement && translations[language]['site.name']) {
+                siteNameElement.textContent = translations[language]['site.name'];
+            }
+            
+            const userCenterLinkElement = document.getElementById('userCenterLink');
+            if (userCenterLinkElement && translations[language]['userCenterLink']) {
+                userCenterLinkElement.textContent = translations[language]['userCenterLink'];
+            }
+            
+            // 更新页面标题和meta标签
+            if (translations[language]['site.title']) {
+                document.title = translations[language]['site.title'];
+            } else if (translations[language]['strategy.page.title']) {
+                document.title = translations[language]['strategy.page.title'];
+            }
+            
+            const keywordsMeta = document.querySelector('meta[name="keywords"]');
+            if (keywordsMeta && translations[language]['site.keywords']) {
+                keywordsMeta.setAttribute('content', translations[language]['site.keywords']);
+            } else if (keywordsMeta && translations[language]['strategy.page.keywords']) {
+                keywordsMeta.setAttribute('content', translations[language]['strategy.page.keywords'];
+            }
+            
+            const descMeta = document.querySelector('meta[name="description"]');
+            if (descMeta && translations[language]['site.description']) {
+                descMeta.setAttribute('content', translations[language]['site.description']);
+            } else if (descMeta && translations[language]['strategy.page.description']) {
+                descMeta.setAttribute('content', translations[language]['strategy.page.description'];
+            }
+            
+            // 强制重绘
+            forceRepaint();
+            
+            // 触发页面内容翻译完成事件
+            document.dispatchEvent(new CustomEvent('contentTranslated', { detail: { language } }));
+        }
+
+        // 专门用于翻译组件的函数
+        function translateComponents() {
+            // 检查是否存在语言切换器并执行翻译
+            if (typeof langSwitcher !== 'undefined' && langSwitcher.translatePage) {
+                langSwitcher.translatePage();
+            }
+            
+            // 手动翻译所有带 data-lang-key 属性的元素
+            const currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            
+            // 使用LanguageSwitcher类中定义的翻译映射
+            const translations = langSwitcher.translations;
+            
+            // 翻译所有带 data-lang-key 属性的元素
+            const elements = document.querySelectorAll('[data-lang-key]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[currentLang] && translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                }
+            });
+        }
+
+        function forceRepaint() {
+            // 使用requestAnimationFrame来确保DOM更新后强制重绘
+            requestAnimationFrame(() => {
+                const body = document.body;
+                const originalStyle = body.style.cssText;
+                body.style.cssText += ';display:none;';
+                body.offsetHeight; // 触发重排
+                body.style.cssText = originalStyle;
+            });
+        }
+
+        // 翻译页面内容的函数
+        function translatePageContent() {
+            // 获取当前语言
+            const currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            
+            // 执行页面内容翻译
+            performTranslation(currentLang);
+            
+            // 触发自定义事件，通知其他组件语言已更新
+            document.dispatchEvent(new CustomEvent('pageContentTranslated', {
+                detail: { language: currentLang }
+            }));
+        }
+        
+        // 页面加载完成后加载社交配置
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSocialConfig();
+        });
+    </script>
+    
+    <script>
+        // 自动更新页面内容
+        function updatePageContent(language) {
+            // 更新页面标题
+            const titleTranslations = {
+                zh: '页面未找到 - 谷比算力',
+                en: 'Page Not Found - Gubi Analytics'
+            };
+            
+            document.title = titleTranslations[language] || titleTranslations.zh;
+            
+            // 更新 meta 标签
+            const metaKeywords = {
+                zh: '区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易',
+                en: 'blockchain strategy development, quantitative trading strategy, data collection, market data interface, K-line data, exchange API, strategy backtesting, Web3 data, blockchain data analysis, automated trading'
+            };
+            
+            const metaDescription = {
+                zh: '我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。',
+                en: 'We specialize in blockchain and quantitative trading, providing strategy development, data collection, market interfaces and backtesting services to help users efficiently obtain on-chain and exchange data, creating intelligent trading and analysis solutions.'
+            };
+            
+            const keywordsMeta = document.querySelector('meta[name="keywords"]');
+            const descriptionMeta = document.querySelector('meta[name="description"]');
+            
+            if (keywordsMeta) {
+                keywordsMeta.setAttribute('content', metaKeywords[language] || metaKeywords.zh);
+            }
+            
+            if (descriptionMeta) {
+                descriptionMeta.setAttribute('content', metaDescription[language] || metaDescription.zh);
+            }
+            
+            // 触发自定义事件，通知其他组件语言已更新
+            document.dispatchEvent(new CustomEvent('pageContentUpdated', {
+                detail: { language: language }
+            }));
+        }
+    </script>
 </body>
 </html>

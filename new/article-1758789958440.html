@@ -37,50 +37,101 @@
     </script>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo - 点击跳转到首页 -->
-                <a href="../index.html" class="flex items-center space-x-2 hover:opacity-90 transition-opacity duration-300">
-                    <img src="../img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto">
-                    <span href="../index.html" class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name">谷比算力</span>
-                </a>
-
-                <!-- 操作按钮 -->
-                <div class="flex items-center space-x-4">
-                    <a href="https://t.me/mevjk_bot" target="_blank" class="hidden md:block px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 font-medium transition-all-300 shadow-md hover:shadow-lg" data-lang-key="btn.start">
-                        立即开始
-                    </a>
-                    <button class="md:hidden px-2 py-1 border border-primary/50 text-primary rounded-md hover:bg-primary/5 transition-colors" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-
-                    <button class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 font-medium transition-all-300" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-        <!-- 悬浮社交按钮 -->
-    <div class="social-floating fixed bottom-24 right-6 z-50 flex flex-col gap-3">
-        <a href="https://t.me/mevjk_bot" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <i class="fa fa-paper-plane text-xl"></i>
-        </a>
-        <a href="https://x.com/gubutdata" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <i class="fa fa-twitter text-xl"></i>
-        </a>
-    </div>
+    <!-- 导航栏占位符 -->
+    <div id="navbar-placeholder"></div>
 
     <div class="article-container">
         <article class="article-content">
             <h1>闪电贷攻击全解析：一笔交易如何完成 161 次代币转移？</h1>
             <div class="article-meta">
-                <span data-lang="zh">发布于: </span><span data-lang="en" class="hidden-lang">Published: </span>2025-09-25
+                <span data-lang="zh">发布于: </span><span data-lang="en" class="hidden-lang">Published: </span>2025/10/11 16:27:26
             </div>
             <div class="article-body">
-                最近，随着多起闪电贷（Flash Loan）套利与攻击事件的发生，这一概念再次成为区块链领域的热门话题。早在 2021 年初，Yearn Finance 就曾遭遇闪电贷攻击。我们追踪其中一笔交易（交易详情），发现短短一笔链上操作，竟然涉及 161 次代币转移，刷新了人们对智能合约的认知。
+                <div class="article-body">
+<p data-start="86" data-end="334">最近，随着多起闪电贷（Flash Loan）套利与攻击事件的发生，这一概念再次成为区块链领域的热门话题。早在 2021 年初，Yearn Finance 就曾遭遇闪电贷攻击。我们追踪其中一笔交易（<a class="decorated-link" href="https://cn.etherscan.com/tx/0x6dc268706818d1e6503739950abc5ba2211fc6b451e54244da7b1e226b12e027" target="_new" rel="noopener" data-start="184" data-end="286">交易详情</a>），发现短短一笔链上操作，竟然涉及 <strong data-start="304" data-end="317">161 次代币转移</strong>，刷新了人们对智能合约的认知。</p>
+<p data-start="336" data-end="415">问题来了：为什么黑客能够在几秒钟之内完成从 dYdX 借款、抵押至 Compound、再一系列操作后完成还款的全过程？答案就在以太坊智能合约的底层机制中。</p>
+<hr data-start="417" data-end="420">
+<h2 data-start="422" data-end="437">智能合约存储在哪里？</h2>
+<p data-start="439" data-end="495">以太坊上的智能合约并不是存在某个&ldquo;服务器&rdquo;上，而是写入到区块链的 <strong data-start="472" data-end="490">状态数据库（StateDB）</strong> 中。</p>
+<ul data-start="496" data-end="619">
+<li data-start="496" data-end="530">
+<p data-start="498" data-end="530">当用户创建一个合约时，以太坊客户端会为其分配唯一的合约地址；</p>
+</li>
+<li data-start="531" data-end="582">
+<p data-start="533" data-end="582">合约的代码和数据会被存储在本地的 StateDB 中，并最终持久化到 <strong data-start="568" data-end="579">LevelDB</strong>；</p>
+</li>
+<li data-start="583" data-end="619">
+<p data-start="585" data-end="619">任何以太坊节点都可以通过合约地址加载代码到内存，并由虚拟机执行。</p>
+</li>
+</ul>
+<p data-start="621" data-end="665">这意味着矿工本地就能完整运行合约逻辑，无需跨网络请求，从而保证了执行的高速与确定性。</p>
+<ul>
+<li><img src="https://static.aicoinstorge.com/attachment/article/20210324/161655860382495.jpg"></li>
+</ul>
+<hr data-start="667" data-end="670">
+<h2 data-start="672" data-end="688">智能合约是如何执行的？</h2>
+<p data-start="690" data-end="771">以太坊使用 <strong data-start="696" data-end="729">EVM（Ethereum Virtual Machine）</strong> 执行合约代码。EVM 定义了一系列指令，每个指令对应执行逻辑与消耗的 Gas。</p>
+<ul data-start="773" data-end="885">
+<li data-start="773" data-end="794">
+<p data-start="775" data-end="794">合约复杂度越高，Gas 消耗越大；</p>
+</li>
+<li data-start="795" data-end="854">
+<p data-start="797" data-end="854">在这笔闪电贷攻击交易中，Gas 消耗高达 <strong data-start="818" data-end="831">8,644,044</strong>，约占一个区块容量的 <strong data-start="842" data-end="851">74.3%</strong>；</p>
+</li>
+<li data-start="855" data-end="885">
+<p data-start="857" data-end="885">黑客为此支付了 <strong data-start="865" data-end="877">3.37 ETH</strong> 的矿工费。</p>
+</li>
+</ul>
+<p data-start="887" data-end="928">这也是为什么闪电贷虽然看似&ldquo;零成本借钱&rdquo;，但实际上背后仍有高额矿工费需要承担。</p>
+<p data-start="887" data-end="928"><img src="https://static.aicoinstorge.com/attachment/article/20210324/161655860446810.jpg"></p>
+<hr data-start="930" data-end="933">
+<h2 data-start="935" data-end="951">合约之间如何相互调用？</h2>
+<p data-start="953" data-end="985">合约调用另一个合约，最终会被编译为 <strong data-start="971" data-end="982">CALL 指令</strong>。</p>
+<ul data-start="987" data-end="1076">
+<li data-start="987" data-end="1016">
+<p data-start="989" data-end="1016">CALL 本身的基础费用为 <strong data-start="1003" data-end="1013">40 Gas</strong>；</p>
+</li>
+<li data-start="1017" data-end="1040">
+<p data-start="1019" data-end="1040">实际开销取决于被调用合约的执行复杂度；</p>
+</li>
+<li data-start="1041" data-end="1076">
+<p data-start="1043" data-end="1076">所有调用过程都在矿工本地客户端中完成，不需要跨客户端网络交互。</p>
+</li>
+</ul>
+<p data-start="1078" data-end="1123">因此，一笔闪电贷攻击交易能在同一客户端内快速完成&ldquo;借款、抵押、兑换、还款&rdquo;等连续动作。</p>
+<p data-start="1078" data-end="1123"><img src="https://static.aicoinstorge.com/attachment/article/20210324/161655860462161.jpg"></p>
+<hr data-start="1125" data-end="1128">
+<h2 data-start="1130" data-end="1147">如果合约执行失败会怎样？</h2>
+<p data-start="1149" data-end="1175">以太坊为合约执行提供了 <strong data-start="1161" data-end="1172">快照与回滚机制</strong>：</p>
+<ul data-start="1176" data-end="1282">
+<li data-start="1176" data-end="1212">
+<p data-start="1178" data-end="1212">在执行前，客户端会调用 <strong data-start="1190" data-end="1202">Snapshot</strong> 保存当前状态；</p>
+</li>
+<li data-start="1213" data-end="1257">
+<p data-start="1215" data-end="1257">若执行中途出错，则调用 <strong data-start="1227" data-end="1247">RevertToSnapshot</strong> 回滚到原状态；</p>
+</li>
+<li data-start="1258" data-end="1282">
+<p data-start="1260" data-end="1282">即便交易失败，Gas 费用依旧会被扣除。</p>
+</li>
+</ul>
+<p data-start="1284" data-end="1328">这就是闪电贷攻击能够&ldquo;零风险试错&rdquo;的原因&mdash;&mdash;失败了也只是损失矿工费，而不会背上债务。</p>
+<p data-start="1284" data-end="1328"><img src="https://static.aicoinstorge.com/attachment/article/20210324/161655860478760.jpg"></p>
+<hr data-start="1330" data-end="1333">
+<h2 data-start="1335" data-end="1342">总结</h2>
+<p data-start="1344" data-end="1410">闪电贷攻击的本质，是利用了 <strong data-start="1358" data-end="1388">EVM 高速执行 + 合约调用链条 + 状态回滚机制</strong>，在一笔交易中完成复杂的套利与攻击操作。</p>
+<ul data-start="1412" data-end="1501">
+<li data-start="1412" data-end="1440">
+<p data-start="1414" data-end="1440">所有操作均在矿工客户端本地完成，无需跨网络调用；</p>
+</li>
+<li data-start="1441" data-end="1465">
+<p data-start="1443" data-end="1465">成功与否取决于交易能否率先被打包进区块；</p>
+</li>
+<li data-start="1466" data-end="1501">
+<p data-start="1468" data-end="1501">尽管表面上&ldquo;零抵押借贷&rdquo;，但背后依旧需要高昂的 Gas 支出。</p>
+</li>
+</ul>
+<p data-start="1503" data-end="1583">正因如此，闪电贷既成为了黑客的攻击利器，也被套利者视为&ldquo;空手套白狼&rdquo;的神器。未来，如何在智能合约设计中防御此类攻击，仍是 DeFi 领域亟待解决的核心问题。</p>
+</div>
             </div>
 
             <div class="related-articles">
@@ -147,25 +198,19 @@
             </div>
         </div>
     </section>
-    
-    <!-- 底部 -->
-    <footer class="bg-gray-900 text-gray-400 py-10 border-t border-gray-800">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <p class="text-sm" data-lang-key="footer.copyright">© 2024 谷比算力. 版权所有.</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="../privacy.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.privacy">隐私政策</a>
-                    <a href="../terms.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.terms">使用条款</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.contact">联系我们</a>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm" data-lang-key="footer.risk">
-                风险提示：加密货币交易具有高风险，请谨慎投资
-            </div>
-        </div>
-    </footer>
+
+    <!-- 悬浮社交按钮占位符 -->
+    <div id="social-floating-placeholder"></div>
+
+    <!-- 底部占位符 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 移动端底部导航栏占位符 -->
+    <div id="mobile-navbar-placeholder"></div>
+
+    <!-- 引入组件加载脚本 -->
+    <script src="../js/components.js"></script>
+
     <script>
         // 页面加载完成后获取相关文章
         document.addEventListener('DOMContentLoaded', function() {
@@ -187,7 +232,7 @@
                 
                 // 获取当前文章ID（从URL中提取）
                 const currentUrl = window.location.href;
-                const matchResult = currentUrl.match(/article-(d+).html/);
+                const matchResult = currentUrl.match(/article-(\d+)\.html/);
                 const currentArticleId = matchResult ? matchResult[1] : null;
 
                 // 过滤掉当前文章，并准备显示数据

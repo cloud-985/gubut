@@ -54,42 +54,8 @@ function generateArticlePage(article) {
     </script>
 </head>
 <body>
-    <!-- 导航栏 -->
-    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo - 点击跳转到首页 -->
-                <a href="../index.html" class="flex items-center space-x-2 hover:opacity-90 transition-opacity duration-300">
-                    <img src="../img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto">
-                    <span href="../index.html" class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name">谷比算力</span>
-                </a>
-
-                <!-- 操作按钮 -->
-                <div class="flex items-center space-x-4">
-                    <a href="https://t.me/mevjk_bot" target="_blank" class="hidden md:block px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 font-medium transition-all-300 shadow-md hover:shadow-lg" data-lang-key="btn.start">
-                        立即开始
-                    </a>
-                    <button class="md:hidden px-2 py-1 border border-primary/50 text-primary rounded-md hover:bg-primary/5 transition-colors" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-
-                    <button class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 font-medium transition-all-300" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-        <!-- 悬浮社交按钮 -->
-    <div class="social-floating fixed bottom-24 right-6 z-50 flex flex-col gap-3">
-        <a href="https://t.me/mevjk_bot" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <i class="fa fa-paper-plane text-xl"></i>
-        </a>
-        <a href="https://x.com/gubutdata" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <i class="fa fa-twitter text-xl"></i>
-        </a>
-    </div>
+    <!-- 导航栏占位符 -->
+    <div id="navbar-placeholder"></div>
 
     <div class="article-container">
         <article class="article-content">
@@ -99,6 +65,17 @@ function generateArticlePage(article) {
             </div>
             <div class="article-body">
                 ${article.content}
+            </div>
+
+            <div class="related-articles">
+                <h3>更多文章</h3>
+                <div id="related-articles-list">
+                <!-- 相关文章将通过JavaScript动态加载 -->
+                    <p>加载中...</p>
+                </div>
+                <div class="all-articles-link">
+                    <a href="../articles.html">查看所有文章 →</a>
+                </div>
             </div>
         </article>
     </div>
@@ -154,25 +131,121 @@ function generateArticlePage(article) {
             </div>
         </div>
     </section>
-    
-    <!-- 底部 -->
-    <footer class="bg-gray-900 text-gray-400 py-10 border-t border-gray-800">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <p class="text-sm" data-lang-key="footer.copyright">© 2024 谷比算力. 版权所有.</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="../privacy.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.privacy">隐私政策</a>
-                    <a href="../terms.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.terms">使用条款</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.contact">联系我们</a>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm" data-lang-key="footer.risk">
-                风险提示：加密货币交易具有高风险，请谨慎投资
-            </div>
-        </div>
-    </footer>
+
+    <!-- 悬浮社交按钮占位符 -->
+    <div id="social-floating-placeholder"></div>
+
+    <!-- 底部占位符 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 移动端底部导航栏占位符 -->
+    <div id="mobile-navbar-placeholder"></div>
+
+    <!-- 引入组件加载脚本 -->
+    <script src="../js/components.js"></script>
+
+    <script>
+        // 页面加载完成后获取相关文章
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRelatedArticles();
+        });
+
+        // 加载相关文章
+        async function loadRelatedArticles() {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            try {
+                // 从articles.json获取文章列表
+                const response = await fetch('../articles.json');
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+
+                const articles = await response.json();
+                
+                // 获取当前文章ID（从URL中提取）
+                const currentUrl = window.location.href;
+                const matchResult = currentUrl.match(/article-(\\d+)\\.html/);
+                const currentArticleId = matchResult ? matchResult[1] : null;
+
+                // 过滤掉当前文章，并准备显示数据
+                const relatedArticles = articles
+                    .filter(article => article.id != currentArticleId) // 使用 != 因为ID可能是字符串或数字
+                    .map(article => ({
+                        id: article.id,
+                        title: article.title,
+                        date: article.date || "",  // 如果没有日期字段则为空
+                        url: "../new/article-" + article.id + ".html"
+                    }));
+
+                // 按日期排序，最新的在前面
+                relatedArticles.sort((a, b) => {
+                    if (a.date && b.date) {
+                        // 如果都有日期，按日期排序
+                        return new Date(b.date) - new Date(a.date);
+                    } else if (a.date) {
+                        // 有日期的排在前面
+                        return -1;
+                    } else if (b.date) {
+                        // 有日期的排在前面
+                        return 1;
+                    } else {
+                        // 都没有日期，保持原有顺序
+                        return 0;
+                    }
+                });
+
+                displayRelatedArticles(relatedArticles);
+            } catch (error) {
+                console.error('加载相关文章失败:', error);
+                relatedArticlesList.innerHTML = '<p>加载相关文章失败</p>';
+            }
+        }
+
+        // 显示相关文章
+        function displayRelatedArticles(articles) {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            if (!articles || articles.length === 0) {
+                relatedArticlesList.innerHTML = '<p>暂无相关文章</p>';
+                return;
+            }
+
+            // 最多显示20篇
+            const relatedArticles = articles.slice(0, 20);
+
+            // 清空当前列表
+            relatedArticlesList.innerHTML = '';
+
+            // 添加相关文章
+            relatedArticles.forEach(article => {
+                const relatedArticle = document.createElement('div');
+                relatedArticle.className = 'related-article';
+
+                // 构造文章显示内容
+                let articleHTML = '<a href="' + article.url + '">' + escapeHtml(article.title) + '</a>';
+                if (article.date) {
+                    articleHTML += '<span class="related-article-date">' + article.date + '</span>';
+                }
+
+                relatedArticle.innerHTML = articleHTML;
+                relatedArticlesList.appendChild(relatedArticle);
+            });
+        }
+
+        // 简单的HTML转义函数，防止XSS攻击
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
 </body>
 </html>`;
 
@@ -185,8 +258,9 @@ function generateArticlePage(article) {
 /**
  * 更新网站地图
  * @param {Array} articles - 文章数组
+ * @param {Array} strategies - 策略数组（可选）
  */
-function updateSitemap(articles) {
+function updateSitemap(articles, strategies = []) {
     const sitemapPath = path.join(__dirname, 'sitemap.xml');
     let existingUrls = {};
     
@@ -208,6 +282,12 @@ function updateSitemap(articles) {
         <lastmod>${existingUrls['https://www.gubut.com/index.html'] || new Date().toISOString().split('T')[0]}</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/strategy.html</loc>
+        <lastmod>${existingUrls['https://www.gubut.com/strategy.html'] || new Date().toISOString().split('T')[0]}</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
     </url>`;
 
     // 添加所有文章页面到网站地图
@@ -222,6 +302,22 @@ function updateSitemap(articles) {
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>`;
+    });
+
+    // 添加所有策略页面到网站地图（如果提供了策略数据）
+    strategies.forEach(strategy => {
+        if (strategy.external_url) {
+            const strategyUrl = strategy.external_url;
+            const lastModDate = existingUrls[strategyUrl] || new Date().toISOString().split('T')[0];
+            
+            sitemapXml += `
+    <url>
+        <loc>${strategyUrl}</loc>
+        <lastmod>${lastModDate}</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>`;
+        }
     });
 
     sitemapXml += `

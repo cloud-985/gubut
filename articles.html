@@ -113,41 +113,8 @@
     </script>
 </head>
 <body class="font-inter bg-light text-dark antialiased">
-    <!-- 导航栏 -->
-    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300 shadow-sm">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16 sm:h-20">
-                <!-- Logo - 点击跳转到首页 -->
-                  <a href="../index.html" class="flex items-center space-x-2 hover:opacity-90 transition-opacity duration-300">
-                      <img src="../img/logo.png" alt="谷比算力 Logo" class="h-8 sm:h-10 w-auto" id="siteLogo">
-                      <span class="text-lg sm:text-xl font-bold text-primary" data-lang-key="site.name" id="siteName">谷比算力</span>
-                  </a>
-                <!-- 操作按钮 -->
-                <div class="flex items-center space-x-4">
-                    <a href="https://t.me/mevjk_bot" target="_blank" class="hidden md:block px-4 py-2 rounded-full bg-primary text-white hover:bg-primary/90 font-medium transition-all-300 shadow-md hover:shadow-lg" data-lang-key="btn.start">
-                        立即开始
-                    </a>
-                    <button class="md:hidden px-2 py-1 border border-primary/50 text-primary rounded-md hover:bg-primary/5 transition-colors" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-
-                    <button class="hidden md:block px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 font-medium transition-all-300" data-lang-switch>
-                        <span data-lang-btn-text>EN</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- 悬浮社交按钮 -->
-    <div class="social-floating fixed bottom-24 right-6 z-50 flex flex-col gap-3">
-        <a href="https://t.me/mevjk_bot" target="_blank" class="social-btn telegram w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="telegramLink1">
-            <i class="fa fa-paper-plane text-xl"></i>
-        </a>
-        <a href="https://x.com/gubutdata" target="_blank" class="social-btn twitter w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1" id="xLink">
-            <i class="fa fa-twitter text-xl"></i>
-        </a>
-    </div>
+    <!-- 导航栏占位符 -->
+    <div id="navbar-placeholder"></div>
 
     <!-- 文章列表 -->
     <section class="articles-section pt-20 sm:pt-28">
@@ -162,373 +129,190 @@
         </div>
     </section>
 
+    <!-- 悬浮社交按钮占位符 -->
+    <div id="social-floating-placeholder"></div>
+
+    <!-- 底部占位符 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 移动端导航栏占位符 -->
+    <div id="mobile-navbar-placeholder"></div>
+
+    <!-- 引入组件加载脚本 -->
+    <script src="../js/components.js"></script>
 
     <script>
-        // 每页显示的文章数量
-        const ARTICLES_PER_PAGE = 12;
-        let currentPage = 1;
-        let allArticles = [];
-        // 缓存文章预览内容
-        const articlePreviewCache = {};
-
-        // 页面加载完成后获取文章列表
+        // 页面加载完成后加载文章列表
         document.addEventListener('DOMContentLoaded', function() {
-            loadArticles();
+            loadArticles(1); // 加载第一页
+            
+            // 监听语言切换事件
+            document.addEventListener('languageChanged', function(e) {
+                console.log('Language changed to:', e.detail.language);
+                // 重新翻译页面内容
+                if (typeof langSwitcher !== 'undefined' && langSwitcher.translatePage) {
+                    setTimeout(() => langSwitcher.translatePage(), 10);
+                }
+                
+                // 自动更新页面特定元素
+                updatePageContent(e.detail.language);
+            });
         });
 
         // 加载文章列表
-        async function loadArticles() {
-            try {
-                console.log('开始加载文章列表...');
-                const startTime = performance.now();
-                
-                // 添加一个可见的加载指示器
-                const articlesList = document.getElementById('articles-list');
-                articlesList.innerHTML = '<div class="loading-indicator text-center py-8">正在加载文章列表...</div>';
-                
-                // 使用服务器提供的API端点获取文章列表
-                console.log('正在发送fetch请求到/api/articles...');
-                const response = await fetch('/api/articles');
-                console.log('获取到响应，状态码:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                console.log('响应正常，开始解析JSON...');
-                const result = await response.json();
-                const endTime = performance.now();
-                console.log(`成功加载并解析JSON，耗时: ${(endTime - startTime).toFixed(2)}ms`);
-                
-                // 在页面上显示API返回的原始数据
-                console.log('API返回的原始数据:', result);
-                
-                if (!result.success || !result.articles) {
-                    throw new Error('API返回数据格式不正确');
-                }
-                
-                console.log('成功获取到文章数据，总数:', result.articles.length);
-                
-
-                
-                // 为了测试，只使用前10篇文章
-                const limitedArticles = result.articles.slice(0, 10);
-                console.log('使用前10篇文章进行测试');
-                
-                // 处理文章数据格式，并修复URL
-                const processedArticles = limitedArticles.map(article => {
-                    // 检查article对象是否有效
-                    if (!article) {
-                        console.warn('发现无效文章对象');
-                        return null;
-                    }
-                    
-                    console.log(`处理文章: ${article.title || '无标题'} (ID: ${article.id})`);
-                    
-                    // 修复URL格式
-                    const url = `./new/article-${article.id}.html`;
-                    console.log(`生成的文章URL: ${url}`);
-                    
-                    return {
-                        id: article.id,
-                        title: article.title || '无标题',
-                        date: article.date || '未知日期',
-                        url: url
-                    };
-                }).filter(article => article !== null); // 过滤掉无效的文章
-                
-                console.log(`处理后有效文章数量: ${processedArticles.length}`);
-                
-                // 按日期排序，最新的在前面
-                processedArticles.sort((a, b) => {
-                    const dateA = new Date(a.date);
-                    const dateB = new Date(b.date);
-                    return dateB - dateA;
-                });
-                
-                console.log('处理后的文章数据:', processedArticles);
-                
-                allArticles = processedArticles;
-                console.log('准备显示文章...');
-                
-                // 直接传递原始数据到控制台，确保数据是正确的
-                console.log('将显示的文章数据:', JSON.stringify(processedArticles));
-                
-                displayArticles(processedArticles);
-            } catch (error) {
-                console.error('加载文章列表失败:', error);
-                console.error('错误详情:', error.stack);
-                // 如果获取文章列表失败，显示错误信息
-                const articlesList = document.getElementById('articles-list');
-                articlesList.innerHTML = `<div class="error-message text-center py-8 text-red-500">
-                    暂时无法加载文章列表
-                    <div class="mt-2 text-sm text-gray-600">错误: ${error.message}</div>
-                </div>`;
-            }
-        }
-        
-        // 显示文章列表
-        function displayArticles(articles) {
+        function loadArticles(page) {
             const articlesList = document.getElementById('articles-list');
-            console.log('进入displayArticles函数，文章总数:', articles.length);
+            articlesList.innerHTML = '<p>正在加载文章...</p>';
             
-            // 清空加载指示器
-            articlesList.innerHTML = '';
-            
-            if (!articles || articles.length === 0) {
-                articlesList.innerHTML = '<p class="no-articles">暂无文章</p>';
-                return;
-            }
-            
-            console.log('准备渲染文章卡片...');
-            
-            // 简单版本：直接显示所有文章，不进行分页
-            // 添加文章卡片
-            articles.forEach(article => {
-                console.log(`渲染文章: ${article.title}`);
-                
-                const articleCard = document.createElement('div');
-                articleCard.className = 'article-card';
-                
-                // 创建更简单的文章卡片HTML，不加载预览内容
-                articleCard.innerHTML = `
-                    <div class="article-card-content">
-                        <h3>${escapeHtml(article.title || '无标题')}</h3>
-                        <p class="article-date">发布于: ${article.date || '未知日期'}</p>
-                        <a href="${article.url}" class="read-more">阅读更多 →</a>
-                    </div>
-                `;
-                
-                // 添加到列表
-                articlesList.appendChild(articleCard);
-                console.log('成功添加文章卡片到DOM');
-            });
-            
-            console.log('文章列表渲染完成，共显示', articles.length, '篇文章');
-            
-            // 简化版本：不显示分页控件
-        }
-        
-        // 修复URL格式的辅助函数
-        function fixUrl(url) {
-            if (!url) return '';
-            
-            // 去除URL两端的引号
-            if (url.startsWith('"') && url.endsWith('"')) {
-                url = url.slice(1, -1);
-            }
-            
-            // 确保是完整的URL
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                // 如果不是完整URL，假设是相对路径
-                return url;
-            }
-            
-            return url;
-        }
-
-        // 加载单篇文章预览
-        function loadArticlePreview(articleId) {
-            // 检查缓存
-            if (articlePreviewCache[articleId]) {
-                displayPreviewContent(articlePreviewCache[articleId], articleId);
-                return;
-            }
-            
-            fetch(`./new/article-${articleId}.html`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Article file not found');
+            // 由于后端API不支持分页，我们忽略page参数直接获取所有文章
+            fetch(`/api/articles`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 手动实现分页逻辑
+                        const articles = data.articles;
+                        const articlesPerPage = 6; // 每页显示5篇文章
+                        const totalPages = Math.ceil(articles.length / articlesPerPage);
+                        const currentPage = page || 1;
+                        const startIndex = (currentPage - 1) * articlesPerPage;
+                        const endIndex = startIndex + articlesPerPage;
+                        const pageArticles = articles.slice(startIndex, endIndex);
+                        
+                        renderArticles(pageArticles, totalPages, currentPage, articles.length);
+                    } else {
+                        articlesList.innerHTML = '<p>加载文章失败</p>';
                     }
-                    return response.text();
-                })
-                .then(html => {
-                    const previewText = parsePreviewContent(html);
-                    // 缓存预览内容
-                    articlePreviewCache[articleId] = previewText;
-                    displayPreviewContent(previewText, articleId);
                 })
                 .catch(error => {
-                    console.error(`加载文章预览 ${articleId} 失败:`, error);
-                    const previewElement = document.getElementById(`article-content-${articleId}`);
-                    if (previewElement) {
-                        previewElement.innerHTML = '<p>内容加载失败</p>';
-                    }
+                    console.error('Error:', error);
+                    articlesList.innerHTML = '<p>加载文章时出错</p>';
                 });
         }
 
-        // 解析预览内容
-        function parsePreviewContent(html) {
-            // 创建临时DOM元素来解析HTML
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
+        // 渲染文章列表
+        function renderArticles(articles, totalPages, currentPage, totalArticles) {
+            const articlesList = document.getElementById('articles-list');
+            articlesList.innerHTML = '';
             
-            // 提取文章内容
-            const articleBody = doc.querySelector('.article-body');
-            if (articleBody) {
-                // 检查article-body内部是否有额外的div标签
-                const innerContent = articleBody.querySelector('div') || articleBody;
-                // 获取纯文本内容并截取前100个字符作为预览
-                const textContent = innerContent.textContent || innerContent.innerText || '';
-                return textContent.length > 100 ? 
-                    textContent.substring(0, 100) + '...' : 
-                    textContent;
-            }
-            return '无法解析文章内容';
-        }
-
-        // 显示预览内容
-        function displayPreviewContent(previewText, articleId) {
-            const previewElement = document.getElementById(`article-content-${articleId}`);
-            if (previewElement) {
-                previewElement.innerHTML = `<p>${escapeHtml(previewText)}</p>`;
-            }
-        }
-
-        // 显示分页控件
-        function showPagination(totalPages) {
-            const pagination = document.getElementById('pagination');
-            
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
+            if (articles.length === 0) {
+                articlesList.innerHTML = '<p>暂无文章</p>';
                 return;
             }
             
-            let paginationHTML = '<div class="pagination-controls">';
+            articles.forEach(article => {
+                // 如果文章有摘要字段就使用摘要，否则从内容中截取
+                let excerpt = '';
+                if (article.excerpt) {
+                    excerpt = article.excerpt;
+                } else if (article.content) {
+                    // 从内容中提取纯文本并截取前100个字符
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = article.content;
+                    excerpt = tempDiv.textContent.substring(0, 100) + '...';
+                }
+                
+                const articleElement = document.createElement('div');
+                articleElement.className = 'article-item mb-6 p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow';
+                articleElement.innerHTML = `
+                    <h2 class="text-xl font-bold mb-2"><a href="new/article-${article.id}.html" target="_blank" class="text-primary hover:text-secondary">${article.title}</a></h2>
+                    <p class="article-meta text-gray-500 text-sm mb-3">${article.date}</p>
+                    <p class="article-excerpt text-gray-700 mb-4">${excerpt}</p>
+                    <a href="new/article-${article.id}.html" target="_blank" class="text-primary hover:text-secondary font-medium">阅读更多 →</a>
+                `;
+                articlesList.appendChild(articleElement);
+            });
+            
+            // 渲染分页控件
+            renderPagination(totalPages, currentPage, totalArticles);
+        }
+
+        // 渲染分页控件
+        function renderPagination(totalPages, currentPage, totalArticles) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // 添加文章统计信息
+            const stats = document.createElement('div');
+            stats.className = 'mb-4 text-gray-600';
+            stats.innerHTML = `共 ${totalArticles} 篇文章`;
+            pagination.appendChild(stats);
+            
+            // 创建分页按钮容器
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'flex space-x-2';
             
             // 上一页按钮
             if (currentPage > 1) {
-                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">上一页</button>`;
+                const prevButton = document.createElement('button');
+                prevButton.textContent = '上一页';
+                prevButton.className = 'px-3 py-1 border border-gray-300 rounded hover:bg-gray-100';
+                prevButton.onclick = () => loadArticles(currentPage - 1);
+                buttonsContainer.appendChild(prevButton);
             }
             
-            // 页码
+            // 页码按钮
             for (let i = 1; i <= totalPages; i++) {
-                if (i === currentPage) {
-                    paginationHTML += `<span class="page-number current">${i}</span>`;
-                } else {
-                    paginationHTML += `<button class="page-btn" onclick="changePage(${i})">${i}</button>`;
-                }
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.className = `px-3 py-1 border rounded ${
+                    i === currentPage 
+                        ? 'bg-primary text-white border-primary' 
+                        : 'border-gray-300 hover:bg-gray-100'
+                }`;
+                pageButton.onclick = () => loadArticles(i);
+                buttonsContainer.appendChild(pageButton);
             }
             
             // 下一页按钮
             if (currentPage < totalPages) {
-                paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">下一页</button>`;
+                const nextButton = document.createElement('button');
+                nextButton.textContent = '下一页';
+                nextButton.className = 'px-3 py-1 border border-gray-300 rounded hover:bg-gray-100';
+                nextButton.onclick = () => loadArticles(currentPage + 1);
+                buttonsContainer.appendChild(nextButton);
             }
             
-            paginationHTML += '</div>';
-            pagination.innerHTML = paginationHTML;
+            pagination.appendChild(buttonsContainer);
         }
-
-        // 切换页面
-        function changePage(page) {
-            currentPage = page;
-            displayArticles(allArticles);
-            // 滚动到顶部
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // 简单的HTML转义函数，防止XSS攻击
-        function escapeHtml(text) {
-            const map = {
-                '&': '&amp;',
-                '<': '&lt;',
-                '>': '&gt;',
-                '"': '&quot;',
-                "'": '&#039;'
+        // 自动更新页面内容
+        function updatePageContent(language) {
+            // 更新页面标题
+            const titleTranslations = {
+                zh: '文章列表 - 谷比算力',
+                en: 'Article List - Gubi Analytics'
             };
             
-            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
-        }
-        // 导航栏滚动效果
-        const header = document.querySelector('header');
-        
-        if (header) {
-            // 初始检查页面滚动位置
-            checkScrollPosition();
+            document.title = titleTranslations[language] || titleTranslations.zh;
             
-            // 监听滚动事件
-            window.addEventListener('scroll', function() {
-                checkScrollPosition();
-            });
+            // 更新 meta 标签
+            const metaKeywords = {
+                zh: '区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易',
+                en: 'blockchain strategy development, quantitative trading strategy, data collection, market data interface, K-line data, exchange API, strategy backtesting, Web3 data, blockchain data analysis, automated trading'
+            };
             
-            function checkScrollPosition() {
-                if (window.scrollY > 20) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
-                }
+            const metaDescription = {
+                zh: '我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。',
+                en: 'We specialize in blockchain and quantitative trading, providing strategy development, data collection, market interfaces and backtesting services to help users efficiently obtain on-chain and exchange data, creating intelligent trading and analysis solutions.'
+            };
+            
+            const keywordsMeta = document.querySelector('meta[name="keywords"]');
+            const descriptionMeta = document.querySelector('meta[name="description"]');
+            
+            if (keywordsMeta) {
+                keywordsMeta.setAttribute('content', metaKeywords[language] || metaKeywords.zh);
             }
+            
+            if (descriptionMeta) {
+                descriptionMeta.setAttribute('content', metaDescription[language] || metaDescription.zh);
+            }
+            
+            // 触发自定义事件，通知其他组件语言已更新
+            document.dispatchEvent(new CustomEvent('pageContentUpdated', {
+                detail: { language: language }
+            }));
         }
     </script>
-    
-    <!-- 数据信号服务板块 -->
-    <section class="py-8 min-h-[20vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-700 text-white">
-        <div class="container mx-auto px-2 sm:px-6 lg:px-8 w-full">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4" data-lang-key="signals.title">
-                    数据信号服务
-                </h2>
-                <p class="text-blue-100 text-lg" data-lang-key="signals.subtitle">
-                    快人一步的行情数据，让你在别人还没反应时，就已经进场
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
-                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
-                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🔔</div>
-                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.new.title">
-                        新币上线提醒
-                    </h3>
-                    <p class="text-blue-100 text-center" data-lang-key="signal.new.desc">
-                        第一时间获取新币上线信息，抢占先机
-                    </p>
-                </div>
-
-                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
-                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🚀</div>
-                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.market.title">
-                        市场异动推送
-                    </h3>
-                    <p class="text-blue-100 text-center" data-lang-key="signal.market.desc">
-                        实时推送资金流异常、盘口深度变化等关键信号
-                    </p>
-                </div>
-
-                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
-                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">💎</div>
-                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.vip.title">
-                        VIP社群服务
-                    </h3>
-                    <p class="text-blue-100 text-center" data-lang-key="signal.vip.desc">
-                        加入专属社群，获取全部信号和深度指标
-                    </p>
-                </div>
-            </div>
-
-            <div class="mt-16 text-center">
-                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn">
-                    免费获取信号
-                </a>
-            </div>
-        </div>
-    </section>
-    <!-- 底部 -->
-    <footer class="bg-gray-900 text-gray-400 py-10 border-t border-gray-800">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-6 md:mb-0">
-                    <p class="text-sm" data-lang-key="footer.copyright">© 2024 谷比算力. 版权所有.</p>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="../privacy.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.privacy">隐私政策</a>
-                    <a href="../terms.html" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.terms">使用条款</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors" data-lang-key="footer.contact">联系我们</a>
-                </div>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-800 text-center text-sm" data-lang-key="footer.risk">
-                风险提示：加密货币交易具有高风险，请谨慎投资
-            </div>
-        </div>
-    </footer>
 </body>
 </html>
