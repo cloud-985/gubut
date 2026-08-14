@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    <title>币安链（BSC）打狗策略脚本详细教程 - 谷比算力</title>
+    <meta name="keywords" content="区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易">
+    <meta name="description" content="我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。">    
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="../styles.css">
+    <!-- 引入语言切换组件 -->
+    <script src="../lang.js"></script>
+        <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#111827',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 导航栏占位符 -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="article-container">
+        <article class="article-content">
+            <h1>币安链（BSC）打狗策略脚本详细教程</h1>
+            <div class="article-meta">
+                <span data-lang="zh">发布于: </span><span data-lang="en" class="hidden-lang">Published: </span>2025/10/10 10:41:08
+            </div>
+            <div class="article-body">
+                <p dir="auto">&ldquo;打狗策略&rdquo;在加密货币社区（尤其是中文社区）中，指的是在Binance Smart Chain（BSC，以前称Binance Chain）上狙击新推出的meme币（俗称&ldquo;土狗&rdquo;或&ldquo;金狗&rdquo;），特别是狗主题或高潜力meme币的交易策略。这种策略属于一级市场链上交易，核心是通过自动化脚本快速监控新流动性池（LP）创建，并在币价暴涨前买入，追求100x甚至更高回报。但请注意，这是一种高风险策略，涉及资金损失、合约漏洞和 rug pull（跑路）风险。<strong>DYOR（Do Your Own Research），本教程仅供学习参考，不构成投资建议。</strong></p>
+<p dir="auto">本教程将从入门准备开始，逐步介绍中阶检查、高阶策略，最后提供一个基于Python的简单&ldquo;打狗&rdquo;脚本示例（使用web3.py库）。脚本实现监控PancakeSwap新pair并自动买入的逻辑。整个过程假设你有基本的Python编程知识和BSC钱包（如MetaMask）。</p>
+<p dir="auto"><strong>当前日期：2025年10月9日</strong>，BSC生态活跃，meme币热潮持续，但监管环境趋严，请确保合规操作。</p>
+<h2 dir="auto">第一步：入门准备（基础设置）</h2>
+<h3 dir="auto">1.1 钱包和资金准备</h3>
+<ul dir="auto">
+<li><strong>创建/导入钱包</strong>：使用MetaMask或Trust Wallet，切换到BSC主网（Chain ID: 56，RPC: <a href="https://bsc-dataseed.binance.org/%EF%BC%89%E3%80%82" target="_blank" rel="noopener noreferrer nofollow">https://bsc-dataseed.binance.org/）。</a></li>
+<li><strong>获取BNB</strong>：在Binance交易所购买BNB（用于Gas费），转入钱包。建议准备0.1-1 BNB作为Gas，另准备1-10 BNB作为交易资金。</li>
+<li><strong>导入私钥</strong>：脚本需要你的私钥（危险！仅在安全环境中使用）。<strong>警告</strong>：私钥泄露将导致资金丢失，建议使用硬件钱包或测试环境。</li>
+</ul>
+<h3 dir="auto">1.2 安装开发环境</h3>
+<ul dir="auto">
+<li><strong>Python环境</strong>：安装Python 3.10+。</li>
+<li><strong>依赖库</strong>：运行以下命令安装：
+<div dir="auto">
+<div data-testid="code-block">
+<div>text</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>pip install web3 requests python-dotenv</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<ul dir="auto">
+<li>web3：与BSC交互。</li>
+<li>requests：API调用（如Dexscreener）。</li>
+<li>python-dotenv：管理环境变量（私钥）。</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto">1.3 核心工具和API</h3>
+<ul dir="auto">
+<li><strong>监控工具</strong>：
+<ul dir="auto">
+<li>Dexscreener.com：实时监控新pair（过滤BSC链，搜索&ldquo;new pairs&rdquo;）。</li>
+<li>Honeypot.is：检查合约是否为honeypot（陷阱）。</li>
+<li>Rugcheck.xyz：检查流动性锁定和rug风险。</li>
+</ul>
+</li>
+<li><strong>交易DEX</strong>：PancakeSwap（BSC上最大AMM）。</li>
+<li><strong>API密钥</strong>：可选，Dexscreener API（免费，但限速）或Infura/Alchemy的BSC RPC（免费tier）。</li>
+</ul>
+<p dir="auto"><strong>提示</strong>：加入Telegram群或Twitter（如@PancakeSwap）监控新币信号。使用Debot或GMGN.ai作为信号源。</p>
+<h2 dir="auto">第二步：中阶心法（合约检查与风险评估）</h2>
+<p dir="auto">在脚本买入前，必须手动或自动化检查合约。盲目打狗易中招。</p>
+<h3 dir="auto">2.1 基本检查清单</h3>
+<p dir="auto">使用表格总结关键检查点：</p>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+<div dir="auto">
+<div>&nbsp;</div>
+<table dir="auto">
+<thead>
+<tr>
+<th data-col-size="xs">检查项</th>
+<th data-col-size="lg">工具/方法</th>
+<th data-col-size="lg">阈值/标准</th>
+<th data-col-size="md">为什么重要？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-col-size="xs"><strong>流动性锁定</strong></td>
+<td data-col-size="lg">Rugcheck.xyz</td>
+<td data-col-size="lg">锁定&gt;6个月，比例&gt;80%</td>
+<td data-col-size="md">防止rug pull（开发者撤资）。</td>
+</tr>
+<tr>
+<td data-col-size="xs"><strong>税费</strong></td>
+<td data-col-size="lg">合约代码或Honeypot.is</td>
+<td data-col-size="lg">买入/卖出税&lt;10%</td>
+<td data-col-size="md">高税费吃掉利润。</td>
+</tr>
+<tr>
+<td data-col-size="xs"><strong>Honeypot</strong></td>
+<td data-col-size="lg">Honeypot.is</td>
+<td data-col-size="lg">无honeypot标记</td>
+<td data-col-size="md">防止无法卖出。</td>
+</tr>
+<tr>
+<td data-col-size="xs"><strong>持有者分布</strong></td>
+<td data-col-size="lg">BscScan.com (Holders tab)</td>
+<td data-col-size="lg">前10持有者&lt;50%</td>
+<td data-col-size="md">避免鲸鱼操控。</td>
+</tr>
+<tr>
+<td data-col-size="xs"><strong>合约所有者</strong></td>
+<td data-col-size="lg">BscScan (Contract tab)</td>
+<td data-col-size="lg">所有者已放弃（renounced）</td>
+<td data-col-size="md">防止后门修改。</td>
+</tr>
+<tr>
+<td data-col-size="xs"><strong>聪明钱追踪</strong></td>
+<td data-col-size="lg">GMGN.ai 或 Arkham</td>
+<td data-col-size="lg">跟随聪明钱地址买入</td>
+<td data-col-size="md">提高胜率。</td>
+</tr>
+</tbody>
+</table>
+<div>&nbsp;</div>
+</div>
+</div>
+<h3 dir="auto">2.2 自动化检查脚本片段</h3>
+<p dir="auto">在主脚本中集成简单API检查（示例使用Honeypot.is API）：</p>
+<div dir="auto">
+<div data-testid="code-block">
+<div>python</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>import requests
+
+def check_honeypot(token_address):
+    url = f"https://api.honeypot.is/v2/IsHoneypot?address={token_address}"
+    response = requests.get(url)
+    data = response.json()
+    if data['IsHoneypot']:
+        return False  # 风险高，跳过
+    return True</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<p dir="auto"><strong>实践</strong>：在Dexscreener搜索新BSC pair，复制合约地址，逐一检查。目标：只打&ldquo;金狗&rdquo;（潜力高、安全）。</p>
+<h2 dir="auto">第三步：高阶策略（信号来源与优化）</h2>
+<h3 dir="auto">3.1 信号获取</h3>
+<ul dir="auto">
+<li><strong>手动</strong>：监控Twitter/X（搜索&ldquo;BSC new meme&rdquo;）或Dexscreener的&ldquo;New Pairs&rdquo;过滤器（排序by age &lt;5min，volume &gt;$10k）。</li>
+<li><strong>半自动</strong>：使用GMGN.ai导入聪明钱地址，追踪其买入。</li>
+<li><strong>全自动</strong>：脚本监听BSC事件（PairCreated）。</li>
+</ul>
+<h3 dir="auto">3.2 策略变体</h3>
+<ul dir="auto">
+<li><strong>保守型</strong>：等待流动性&gt; $50k，买入0.1 BNB，止盈3x。</li>
+<li><strong>激进型</strong>：新pair &lt;1min买入，目标100x，但Gas战激烈（需高Gas price）。</li>
+<li><strong>聪明钱跟单</strong>：脚本监控特定地址交易，复制买入。</li>
+</ul>
+<p dir="auto"><strong>优化提示</strong>：Gas费控制在5-20 Gwei；使用多钱包分散风险；设置止损（如果价格跌20%卖出）。</p>
+<h2 dir="auto">第四步：打狗脚本实现（核心代码）</h2>
+<p dir="auto">以下是一个基础的Python脚本：监控PancakeSwap工厂合约的新pair事件，当检测到新狗币（简单过滤：名称含&ldquo;dog&rdquo;）时，自动检查并买入。</p>
+<h3 dir="auto">4.1 环境配置</h3>
+<p dir="auto">创建.env文件：</p>
+<div dir="auto">
+<div data-testid="code-block">
+<div>text</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>PRIVATE_KEY=你的私钥（无0x）
+WALLET_ADDRESS=你的钱包地址
+RPC_URL=https://bsc-dataseed.binance.org/
+PANCAKE_FACTORY=0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73  # PancakeSwap Factory
+WETH=0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c  # WBNB
+BUY_AMOUNT=0.1  # BNB买入金额
+SLIPPAGE=10  # 滑点容忍%</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<h3 dir="auto">4.2 完整脚本代码</h3>
+<div dir="auto">
+<div data-testid="code-block">
+<div>python</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>import os
+import time
+import json
+from web3 import Web3
+from dotenv import load_dotenv
+from web3.middleware import geth_poa_middleware
+import requests  # 用于检查
+
+load_dotenv()
+
+# 配置
+w3 = Web3(Web3.HTTPProvider(os.getenv('RPC_URL')))
+w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+private_key = os.getenv('PRIVATE_KEY')
+wallet_address = os.getenv('WALLET_ADDRESS')
+factory_address = os.getenv('PANCAKE_FACTORY')
+weth_address = os.getenv('WETH')
+buy_amount_wei = w3.to_wei(float(os.getenv('BUY_AMOUNT')), 'ether')
+slippage = int(os.getenv('SLIPPAGE'))
+
+# Pancake Router ABI (简化版，用于swap)
+router_abi = json.loads('[{"inputs":[{"internalType":"uint256","name":"amountOutMin","type":"uint256"},{"internalType":"address[]","name":"path","type":"address[]"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"}],"name":"swapExactETHForTokens","outputs":[{"internalType":"uint256[]","name":"amounts","type":"uint256[]"}],"stateMutability":"payable","type":"function"}]')
+router_address = '0x10ED43C718714eb63d5aA57B78B54704E256024E'  # Pancake Router V2
+router = w3.eth.contract(address=router_address, abi=router_abi)
+
+# Factory ABI (监听PairCreated事件)
+factory_abi = json.loads('[{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"token0","type":"address"},{"indexed":true,"internalType":"address","name":"token1","type":"address"},{"indexed":false,"internalType":"uint24","name":"fee","type":"uint24"},{"indexed":false,"internalType":"int24","name":"tickSpacing","type":"int24"},{"indexed":false,"internalType":"address","name":"pool","type":"address"}],"name":"PoolCreated","type":"event"}]')  # 简化，实际用完整ABI
+factory = w3.eth.contract(address=factory_address, abi=factory_abi)
+
+def check_honeypot(token_address):
+    try:
+        url = f"https://api.honeypot.is/v2/IsHoneypot?address={token_address}"
+        response = requests.get(url)
+        data = response.json()
+        return not data.get('IsHoneypot', True)  # 安全返回True
+    except:
+        return False  # 出错跳过
+
+def get_token_name(token_address):
+    # 简化：实际用BscScan API或合约调用
+    # 这里假设通过API获取，示例返回模拟
+    return "DOGE-MEME"  # 占位，实际实现合约call
+
+def buy_token(token_address):
+    if not check_honeypot(token_address):
+        print(f"Token {token_address} unsafe, skipping.")
+        return False
+    
+    path = [weth_address, token_address]
+    amount_out_min = 0  # 实际计算基于slippage
+    deadline = int(time.time()) + 300  # 5min
+    
+    tx = router.functions.swapExactETHForTokens(
+        amount_out_min, path, wallet_address, deadline
+    ).build_transaction({
+        'from': wallet_address,
+        'value': buy_amount_wei,
+        'gas': 300000,
+        'gasPrice': w3.to_wei('10', 'gwei'),
+        'nonce': w3.eth.get_transaction_count(wallet_address),
+    })
+    
+    signed_tx = w3.eth.account.sign_transaction(tx, private_key)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    print(f"Buy TX: {tx_hash.hex()}")
+    return True
+
+# 事件监听
+def handle_event(event):
+    args = event['args']
+    token0 = args['token0']
+    token1 = args['token1']
+    # 假设token1是新meme币
+    new_token = token1 if token0.lower() == weth_address.lower() else token0
+    token_name = get_token_name(new_token)
+    if 'dog' in token_name.lower():  # 简单过滤狗币
+        print(f"New dog token detected: {new_token}")
+        buy_token(new_token)
+
+# 启动监听
+filter = factory.events.PairCreated.create_filter(fromBlock='latest')
+while True:
+    for event in filter.get_new_entries():
+        handle_event(event)
+    time.sleep(2)  # 轮询间隔</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<h3 dir="auto">4.3 脚本说明</h3>
+<ul dir="auto">
+<li><strong>逻辑</strong>：轮询Factory合约的PairCreated事件，过滤含&ldquo;dog&rdquo;的新token，检查honeypot后买入。</li>
+<li><strong>改进点</strong>：
+<ul dir="auto">
+<li>集成Dexscreener API实时获取token name/volume。</li>
+<li>添加止盈/止损：监控价格，调用swapTokensForExactETH卖出。</li>
+<li>多线程：并行检查多个pair。</li>
+<li>测试：先在BSC测试网运行（RPC: <a href="https://data-seed-prebsc-1-s1.binance.org:8545/%EF%BC%89%E3%80%82" target="_blank" rel="noopener noreferrer nofollow">https://data-seed-prebsc-1-s1.binance.org:8545/）。</a></li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto">4.4 如何运行</h3>
+<ol dir="auto">
+<li>保存代码为dog_sniper.py。</li>
+<li>运行python dog_sniper.py。</li>
+<li>监控控制台输出，确认TX在BscScan验证。</li>
+<li><strong>测试</strong>：用小额资金，模拟事件。</li>
+</ol>
+<h2 dir="auto">第五步：风险与注意事项</h2>
+<h3 dir="auto">5.1 常见陷阱</h3>
+<ul dir="auto">
+<li><strong>Rug Pull</strong>：开发者撤LP，脚本无法卖出。</li>
+<li><strong>MEV Bot</strong>：你的TX被抢跑，需用Flashbots或高Gas。</li>
+<li><strong>Gas战</strong>：热门新币Gas飙升，设置动态gas（w3.eth.gas_price）。</li>
+<li><strong>法律风险</strong>：meme币易涉诈骗，确保不洗钱。</li>
+</ul>
+<h3 dir="auto">5.2 高级提示</h3>
+<ul dir="auto">
+<li><strong>多链扩展</strong>：改RPC支持ETH/SOL。</li>
+<li><strong>社区资源</strong>：参考Binance Square的&ldquo;打狗棒法&rdquo;系列（入门/中阶/高阶），或GitHub搜索&ldquo;BSC sniper bot&rdquo;。</li>
+<li><strong>绩效追踪</strong>：用Excel记录胜率，目标&gt;20%中100x。</li>
+</ul>
+<p dir="auto">通过这个教程，你可以从零起步实现自动化打狗。实践时从小额开始，持续优化脚本。祝好运，但记住：加密市场无常，投资需谨慎！如果需要代码调试或扩展，随时问我。</p>
+            </div>
+
+            <div class="related-articles">
+                <h3>更多文章</h3>
+                <div id="related-articles-list">
+                <!-- 相关文章将通过JavaScript动态加载 -->
+                    <p>加载中...</p>
+                </div>
+                <div class="all-articles-link">
+                    <a href="../articles.html">查看所有文章 →</a>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <!-- 数据信号服务板块 -->
+    <section class="py-8 min-h-[20vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-700 text-white">
+        <div class="container mx-auto px-2 sm:px-6 lg:px-8 w-full">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4" data-lang-key="signals.title">
+                    数据信号服务
+                </h2>
+                <p class="text-blue-100 text-lg" data-lang-key="signals.subtitle">
+                    快人一步的行情数据，让你在别人还没反应时，就已经进场
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🔔</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.new.title">
+                        新币上线提醒
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.new.desc">
+                        第一时间获取新币上线信息，抢占先机
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🚀</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.market.title">
+                        市场异动推送
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.market.desc">
+                        实时推送资金流异常、盘口深度变化等关键信号
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">💎</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.vip.title">
+                        VIP社群服务
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.vip.desc">
+                        加入专属社群，获取全部信号和深度指标
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn">
+                    免费获取信号
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 悬浮社交按钮占位符 -->
+    <div id="social-floating-placeholder"></div>
+
+    <!-- 底部占位符 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 移动端底部导航栏占位符 -->
+    <div id="mobile-navbar-placeholder"></div>
+
+    <!-- 引入组件加载脚本 -->
+    <script src="../js/components.js"></script>
+
+    <script>
+        // 页面加载完成后获取相关文章
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRelatedArticles();
+        });
+
+        // 加载相关文章
+        async function loadRelatedArticles() {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            try {
+                // 从articles.json获取文章列表
+                const response = await fetch('../articles.json');
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+
+                const articles = await response.json();
+                
+                // 获取当前文章ID（从URL中提取）
+                const currentUrl = window.location.href;
+                const matchResult = currentUrl.match(/article-(\d+)\.html/);
+                const currentArticleId = matchResult ? matchResult[1] : null;
+
+                // 过滤掉当前文章，并准备显示数据
+                const relatedArticles = articles
+                    .filter(article => article.id != currentArticleId) // 使用 != 因为ID可能是字符串或数字
+                    .map(article => ({
+                        id: article.id,
+                        title: article.title,
+                        date: article.date || "",  // 如果没有日期字段则为空
+                        url: "../new/article-" + article.id + ".html"
+                    }));
+
+                // 按日期排序，最新的在前面
+                relatedArticles.sort((a, b) => {
+                    if (a.date && b.date) {
+                        // 如果都有日期，按日期排序
+                        return new Date(b.date) - new Date(a.date);
+                    } else if (a.date) {
+                        // 有日期的排在前面
+                        return -1;
+                    } else if (b.date) {
+                        // 有日期的排在前面
+                        return 1;
+                    } else {
+                        // 都没有日期，保持原有顺序
+                        return 0;
+                    }
+                });
+
+                displayRelatedArticles(relatedArticles);
+            } catch (error) {
+                console.error('加载相关文章失败:', error);
+                relatedArticlesList.innerHTML = '<p>加载相关文章失败</p>';
+            }
+        }
+
+        // 显示相关文章
+        function displayRelatedArticles(articles) {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            if (!articles || articles.length === 0) {
+                relatedArticlesList.innerHTML = '<p>暂无相关文章</p>';
+                return;
+            }
+
+            // 最多显示20篇
+            const relatedArticles = articles.slice(0, 20);
+
+            // 清空当前列表
+            relatedArticlesList.innerHTML = '';
+
+            // 添加相关文章
+            relatedArticles.forEach(article => {
+                const relatedArticle = document.createElement('div');
+                relatedArticle.className = 'related-article';
+
+                // 构造文章显示内容
+                let articleHTML = '<a href="' + article.url + '">' + escapeHtml(article.title) + '</a>';
+                if (article.date) {
+                    articleHTML += '<span class="related-article-date">' + article.date + '</span>';
+                }
+
+                relatedArticle.innerHTML = articleHTML;
+                relatedArticlesList.appendChild(relatedArticle);
+            });
+        }
+
+        // 简单的HTML转义函数，防止XSS攻击
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    <title>Solana链打狗策略脚本详细教程 - 谷比算力</title>
+    <meta name="keywords" content="区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易">
+    <meta name="description" content="我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。">    
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="../styles.css">
+    <!-- 引入语言切换组件 -->
+    <script src="../lang.js"></script>
+        <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#111827',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 导航栏占位符 -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="article-container">
+        <article class="article-content">
+            <h1>Solana链打狗策略脚本详细教程</h1>
+            <div class="article-meta">
+                <span data-lang="zh">发布于: </span><span data-lang="en" class="hidden-lang">Published: </span>2025/10/10 10:41:48
+            </div>
+            <div class="article-body">
+                <p dir="auto">&ldquo;打狗策略&rdquo;在Solana生态中，指的是狙击新推出的meme币（俗称&ldquo;土狗&rdquo;或&ldquo;金狗&rdquo;），特别是通过pump.fun平台快速发射的狗主题或高潜力token。这种策略利用Solana的高TPS（每秒交易数）和低Gas费，实现一级市场链上狙击：在token bonding curve（绑定曲线）早期买入，等待迁移到Raydium DEX添加流动性后暴涨，追求10x-100x回报。2025年，Solana meme热潮持续，pump.fun主导新币发射（日均数百个），但竞争激烈，需高速RPC和bot优化。 <strong>DYOR（Do Your Own Research），本教程仅供学习参考，不构成投资建议。高风险包括rug pull、honeypot和资金损失。</strong></p>
+<p dir="auto">本教程从入门准备开始，逐步介绍检查、高阶策略，最后提供一个基于Python的简单sniper脚本（使用solana-py库）。脚本实现监控pump.fun新token创建，并在安全检查后自动买入。假设你有Python基础和Solana钱包（如Phantom）。全过程在主网测试，小额起步。</p>
+<p dir="auto"><strong>当前日期：2025年10月9日</strong>，Solana网络拥堵时Gas可达0.01 SOL/笔，建议使用付费RPC（如QuickNode或Helius）。</p>
+<h2 dir="auto">第一步：入门准备（基础设置）</h2>
+<h3 dir="auto">1.1 钱包和资金准备</h3>
+<ul dir="auto">
+<li><strong>创建/导入钱包</strong>：使用Phantom或Solflare，切换到Solana主网（RPC: <a href="https://api.mainnet-beta.solana.com/%EF%BC%8C%E4%BD%86%E6%8E%A8%E8%8D%90%E4%BB%98%E8%B4%B9%E8%8A%82%E7%82%B9%EF%BC%89%E3%80%82" target="_blank" rel="noopener noreferrer nofollow">https://api.mainnet-beta.solana.com/，但推荐付费节点）。</a></li>
+<li><strong>获取SOL</strong>：在Binance或Coinbase购买SOL（Gas+交易资金），转入钱包。建议0.05-0.5 SOL Gas，另1-5 SOL交易。</li>
+<li><strong>导出私钥</strong>：脚本需私钥（危险！仅安全环境）。<strong>警告</strong>：泄露=资金丢失，使用硬件如Ledger。</li>
+</ul>
+<h3 dir="auto">1.2 安装开发环境</h3>
+<ul dir="auto">
+<li><strong>Python环境</strong>：Python 3.10+。</li>
+<li><strong>依赖库</strong>：运行：
+<div dir="auto">
+<div data-testid="code-block">
+<div>text</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>pip install solana solders anchorpy requests python-dotenv websockets</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<ul dir="auto">
+<li>solana：Solana RPC交互。</li>
+<li>solders：低级交易构建。</li>
+<li>anchorpy：解码pump.fun Anchor程序。</li>
+<li>requests/websockets：API和WS监控。</li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto">1.3 核心工具和API</h3>
+<ul dir="auto">
+<li><strong>监控工具</strong>：
+<ul dir="auto">
+<li>pump.fun：新币发射平台（<a href="https://pump.fun/%EF%BC%89%E3%80%82" target="_blank" rel="noopener noreferrer nofollow">https://pump.fun/）。</a></li>
+<li>Dexscreener.com：实时pair（过滤Solana，new pairs &lt;5min）。</li>
+<li>Birdeye.so：token数据和聪明钱追踪。</li>
+</ul>
+</li>
+<li><strong>交易DEX</strong>：Raydium（AMM主力），或Jupiter聚合器。</li>
+<li><strong>RPC提供商</strong>：QuickNode/Helius（免费tier限速，付费&lt;1ms延迟）。获取WS端点用于事件监听。</li>
+<li><strong>API密钥</strong>：Helius Webhooks（免费）或pump.fun IDL（从GitHub下载）。</li>
+</ul>
+<p dir="auto"><strong>提示</strong>：加入Discord/Twitter（如@pumpdotfun）监控信号。使用Trojan Bot或Solsniffer作为半自动工具。</p>
+<h2 dir="auto">第二步：中阶心法（合约检查与风险评估）</h2>
+<p dir="auto">Solana token易rug（开发者撤资），买入前必查。pump.fun token有6位小数（非标准9位）。</p>
+<h3 dir="auto">2.1 基本检查清单</h3>
+<p dir="auto">使用表格总结：</p>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+<div dir="auto">
+<div>&nbsp;</div>
+<table dir="auto">
+<thead>
+<tr>
+<th data-col-size="sm">检查项</th>
+<th data-col-size="xl">工具/方法</th>
+<th data-col-size="lg">阈值/标准</th>
+<th data-col-size="md">为什么重要？</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-col-size="sm"><strong>流动性锁定</strong></td>
+<td data-col-size="xl">Rugcheck.xyz 或 SolanaTracker</td>
+<td data-col-size="lg">锁定&gt;6个月，比例&gt;80%</td>
+<td data-col-size="md">防rug pull。</td>
+</tr>
+<tr>
+<td data-col-size="sm"><strong>Honeypot</strong></td>
+<td data-col-size="xl">QuillCheck / Solsniffer</td>
+<td data-col-size="lg">无honeypot标记</td>
+<td data-col-size="md">防无法卖出。</td>
+</tr>
+<tr>
+<td data-col-size="sm"><strong>税费</strong></td>
+<td data-col-size="xl">Birdeye.so 或合约代码</td>
+<td data-col-size="lg">买入/卖出税&lt;5%</td>
+<td data-col-size="md">高税吃利润。</td>
+</tr>
+<tr>
+<td data-col-size="sm"><strong>持有者分布</strong></td>
+<td data-col-size="xl">Solscan.io (Holders)</td>
+<td data-col-size="lg">前10持有&lt;40%</td>
+<td data-col-size="md">避鲸鱼操控。</td>
+</tr>
+<tr>
+<td data-col-size="sm"><strong>Mint权限</strong></td>
+<td data-col-size="xl">Solscan (Token tab)</td>
+<td data-col-size="lg">Mint已放弃（freeze）</td>
+<td data-col-size="md">防无限增发。</td>
+</tr>
+<tr>
+<td data-col-size="sm"><strong>聪明钱</strong></td>
+<td data-col-size="xl">Birdeye 或 Dexscreener</td>
+<td data-col-size="lg">跟随KOL/聪明地址买入</td>
+<td data-col-size="md">提高胜率。</td>
+</tr>
+</tbody>
+</table>
+<div>&nbsp;</div>
+</div>
+</div>
+<h3 dir="auto">2.2 自动化检查脚本片段</h3>
+<p dir="auto">集成QuillCheck API（示例）：</p>
+<div dir="auto">
+<div data-testid="code-block">
+<div>python</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>import requests
+
+def check_honeypot(token_address):
+    url = f"https://check.quillai.network/api/v1/tokens/{token_address}/report?chain=solana"
+    response = requests.get(url)
+    data = response.json()
+    if data.get('is_honeypot', False) or data.get('risk_score', 0) &gt; 70:
+        return False  # 风险高，跳过
+    return True</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<p dir="auto"><strong>实践</strong>：在pump.fun搜索新币，复制mint地址，逐查。只打&ldquo;金狗&rdquo;。</p>
+<h2 dir="auto">第三步：高阶策略（信号来源与优化）</h2>
+<h3 dir="auto">3.1 信号获取</h3>
+<ul dir="auto">
+<li><strong>手动</strong>：pump.fun&ldquo;New&rdquo;页，过滤&lt;1min发射，volume&gt;10k USD。</li>
+<li><strong>半自动</strong>：Dexscreener API或Birdeye Webhook监控新Raydium LP。</li>
+<li><strong>全自动</strong>：WS监听pump.fun程序ID（6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P）&ldquo;create&rdquo;事件，或Raydium&ldquo;initialize2&rdquo;指令。</li>
+</ul>
+<h3 dir="auto">3.2 策略变体</h3>
+<ul dir="auto">
+<li><strong>保守型</strong>：bonding curve 50%完成买入0.05 SOL，止盈5x。</li>
+<li><strong>激进型</strong>：&lt;30s买入，目标50x，但需Jito bundle防MEV。</li>
+<li><strong>聪明钱跟单</strong>：监控KOL地址，复制买入。</li>
+</ul>
+<p dir="auto"><strong>优化提示</strong>：优先费0.0002-0.001 SOL；多钱包分散；动态滑点5-15%；用Geyser插件低延迟。</p>
+<h2 dir="auto">第四步：打狗脚本实现（核心代码）</h2>
+<p dir="auto">以下基础Python脚本：WS监控pump.fun新token，过滤含&ldquo;dog&rdquo;的，检查后买入（使用Jupiter swap模拟）。基于Chainstack和QuickNode指南简化。 完整版见GitHub: <a href="https://github.com/chainstacklabs/pump-fun-bot%E3%80%82" target="_blank" rel="noopener noreferrer nofollow">https://github.com/chainstacklabs/pump-fun-bot。</a></p>
+<h3 dir="auto">4.1 环境配置</h3>
+<p dir="auto">下载pump.fun IDL: idl/pump_fun_idl.json（从<a href="https://github.com/chainstacklabs/pump-fun-bot%EF%BC%89%E3%80%82%E5%88%9B%E5%BB%BA%60.env%60%EF%BC%9A" target="_blank" rel="noopener noreferrer nofollow">https://github.com/chainstacklabs/pump-fun-bot）。创建`.env`：</a></p>
+<div dir="auto">
+<div data-testid="code-block">
+<div>text</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>PRIVATE_KEY=你的私钥（base58）
+WALLET_ADDRESS=你的钱包地址
+RPC_URL=https://api.mainnet-beta.solana.com  # 替换为QuickNode
+WS_URL=wss://api.mainnet-beta.solana.com    # WS端点
+PUMP_PROGRAM=6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P
+BUY_AMOUNT=0.05  # SOL买入
+SLIPPAGE=10  # %
+COOLDOWN=15  # 秒延迟</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<h3 dir="auto">4.2 完整脚本代码</h3>
+<div dir="auto">
+<div data-testid="code-block">
+<div>python</div>
+<div>
+<div>
+<div>&nbsp;</div>
+</div>
+</div>
+<div>
+<pre tabindex="0"><code>import os
+import time
+import json
+import asyncio
+import websockets
+from solana.rpc.async_api import AsyncClient
+from solana.rpc.websocket_api import connect
+from solders.pubkey import Pubkey
+from solders.keypair import Keypair
+from anchorpy import Idl, Program
+from dotenv import load_dotenv
+import requests  # 检查
+
+load_dotenv()
+
+# 配置
+rpc_url = os.getenv('RPC_URL')
+ws_url = os.getenv('WS_URL')
+private_key = os.getenv('PRIVATE_KEY')
+wallet = Keypair.from_base58_string(private_key)
+wallet_address = wallet.pubkey()
+pump_program = Pubkey.from_string(os.getenv('PUMP_PROGRAM'))
+buy_amount_lamports = int(float(os.getenv('BUY_AMOUNT')) * 10**9)
+slippage = int(os.getenv('SLIPPAGE'))
+cooldown = int(os.getenv('COOLDOWN'))
+
+# 加载IDL (假设文件存在)
+with open('idl/pump_fun_idl.json', 'r') as f:
+    idl = Idl.from_json(f.read())
+program = Program(idl, pump_program, AsyncClient(rpc_url))
+
+def check_honeypot(token_mint):
+    try:
+        url = f"https://check.quillai.network/api/v1/tokens/{token_mint}/report?chain=solana"
+        response = requests.get(url)
+        data = response.json()
+        return not data.get('is_honeypot', True) and data.get('risk_score', 100) &lt; 30
+    except:
+        return False
+
+async def buy_token(token_mint):
+    if not check_honeypot(token_mint):
+        print(f"Token {token_mint} unsafe, skipping.")
+        return False
+    
+    # 简化Jupiter swap (实际集成Jupiter API或Raydium SDK)
+    # 这里模拟: 构建buy指令 (使用Anchor)
+    try:
+        # 获取bonding curve (简化，实际从事件解码)
+        bonding_curve = Pubkey.find_program_address([b"bonding-curve", token_mint.bytes], pump_program)[0]
+        # 构建buy tx (伪代码，参考Chainstack manual_buy.py)
+        ix = program.instruction["buy"](
+            amount=buy_amount_lamports,
+            ctx={"accounts": {
+                "user": wallet_address,
+                "mint": token_mint,
+                "bonding_curve": bonding_curve,
+                # ... 其他账户
+            }}
+        )
+        tx = await program.rpc(ix, ctx={"signer": wallet})
+        print(f"Buy TX: {tx.value}")
+        return True
+    except Exception as e:
+        print(f"Buy failed: {e}")
+        return False
+
+async def monitor_pump():
+    async with connect(ws_url) as websocket:
+        # 订阅logs for pump program
+        await websocket.program_subscribe(pump_program)
+        async for msg in websocket:
+            if 'result' in msg and 'value' in msg['result']:
+                logs = msg['result']['value']['logs']
+                # 过滤create指令 (Anchor discriminator)
+                if any('create' in log for log in logs):
+                    # 解码事件获取mint (简化，从logs解析)
+                    token_mint_str = "示例MINT从日志提取"  # 实际: 使用anchorpy解码
+                    token_mint = Pubkey.from_string(token_mint_str)
+                    token_name = "DOGE-MEME"  # 实际API获取
+                    if 'dog' in token_name.lower():
+                        print(f"New dog token: {token_mint}")
+                        await asyncio.sleep(cooldown)
+                        await buy_token(token_mint)
+
+# 运行
+asyncio.run(monitor_pump())</code></pre>
+</div>
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+</div>
+</div>
+<h3 dir="auto">4.3 脚本说明</h3>
+<ul dir="auto">
+<li><strong>逻辑</strong>：WS订阅pump.fun程序logs，过滤&ldquo;create&rdquo;事件，解码mint，检查后买入（bonding curve buy）。</li>
+<li><strong>改进点</strong>：
+<ul dir="auto">
+<li>集成Jito bundle防MEV（见GitHub jito-go）。</li>
+<li>添加卖出：监控价格，调用sell指令。</li>
+<li>Raydium扩展：订阅&ldquo;initialize2&rdquo;日志检测LP迁移。</li>
+<li>测试：用devnet RPC（<a href="https://api.devnet.solana.com%EF%BC%89%E3%80%82" target="_blank" rel="noopener noreferrer nofollow">https://api.devnet.solana.com）。</a></li>
+</ul>
+</li>
+</ul>
+<h3 dir="auto">4.4 如何运行</h3>
+<ol dir="auto">
+<li>保存为sol_sniper.py，下载IDL。</li>
+<li>python sol_sniper.py。</li>
+<li>监控日志，验证TX在Solscan.io。</li>
+<li><strong>测试</strong>：小额，模拟事件。</li>
+</ol>
+<h2 dir="auto">第五步：风险与注意事项</h2>
+<h3 dir="auto">5.1 常见陷阱</h3>
+<ul dir="auto">
+<li><strong>Rug Pull</strong>：pump.fun后开发者撤曲线。</li>
+<li><strong>MEV/Jito战</strong>：TX被抢，需bundle和高优先费。</li>
+<li><strong>网络拥堵</strong>：免费RPC延迟&gt;10s，用付费&lt;1s。</li>
+<li><strong>法律</strong>：meme易涉诈骗，合规操作。</li>
+</ul>
+<h3 dir="auto">5.2 高级提示</h3>
+<ul dir="auto">
+<li><strong>多链</strong>：扩展到Base/ETH。</li>
+<li><strong>资源</strong>：Chainstack GitHub教程，Reddit r/SolanaSniperBots。</li>
+<li><strong>追踪</strong>：Excel记录，目标胜率&gt;15%。</li>
+</ul>
+<p dir="auto">通过此教程，你可自动化Solana打狗。从小额实践，优化bot。祝好运，市场无常，谨慎投资！需调试问我。</p>
+            </div>
+
+            <div class="related-articles">
+                <h3>更多文章</h3>
+                <div id="related-articles-list">
+                <!-- 相关文章将通过JavaScript动态加载 -->
+                    <p>加载中...</p>
+                </div>
+                <div class="all-articles-link">
+                    <a href="../articles.html">查看所有文章 →</a>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <!-- 数据信号服务板块 -->
+    <section class="py-8 min-h-[20vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-700 text-white">
+        <div class="container mx-auto px-2 sm:px-6 lg:px-8 w-full">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4" data-lang-key="signals.title">
+                    数据信号服务
+                </h2>
+                <p class="text-blue-100 text-lg" data-lang-key="signals.subtitle">
+                    快人一步的行情数据，让你在别人还没反应时，就已经进场
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🔔</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.new.title">
+                        新币上线提醒
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.new.desc">
+                        第一时间获取新币上线信息，抢占先机
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🚀</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.market.title">
+                        市场异动推送
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.market.desc">
+                        实时推送资金流异常、盘口深度变化等关键信号
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">💎</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.vip.title">
+                        VIP社群服务
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.vip.desc">
+                        加入专属社群，获取全部信号和深度指标
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn">
+                    免费获取信号
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 悬浮社交按钮占位符 -->
+    <div id="social-floating-placeholder"></div>
+
+    <!-- 底部占位符 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 移动端底部导航栏占位符 -->
+    <div id="mobile-navbar-placeholder"></div>
+
+    <!-- 引入组件加载脚本 -->
+    <script src="../js/components.js"></script>
+
+    <script>
+        // 页面加载完成后获取相关文章
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRelatedArticles();
+        });
+
+        // 加载相关文章
+        async function loadRelatedArticles() {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            try {
+                // 从articles.json获取文章列表
+                const response = await fetch('../articles.json');
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+
+                const articles = await response.json();
+                
+                // 获取当前文章ID（从URL中提取）
+                const currentUrl = window.location.href;
+                const matchResult = currentUrl.match(/article-(\d+)\.html/);
+                const currentArticleId = matchResult ? matchResult[1] : null;
+
+                // 过滤掉当前文章，并准备显示数据
+                const relatedArticles = articles
+                    .filter(article => article.id != currentArticleId) // 使用 != 因为ID可能是字符串或数字
+                    .map(article => ({
+                        id: article.id,
+                        title: article.title,
+                        date: article.date || "",  // 如果没有日期字段则为空
+                        url: "../new/article-" + article.id + ".html"
+                    }));
+
+                // 按日期排序，最新的在前面
+                relatedArticles.sort((a, b) => {
+                    if (a.date && b.date) {
+                        // 如果都有日期，按日期排序
+                        return new Date(b.date) - new Date(a.date);
+                    } else if (a.date) {
+                        // 有日期的排在前面
+                        return -1;
+                    } else if (b.date) {
+                        // 有日期的排在前面
+                        return 1;
+                    } else {
+                        // 都没有日期，保持原有顺序
+                        return 0;
+                    }
+                });
+
+                displayRelatedArticles(relatedArticles);
+            } catch (error) {
+                console.error('加载相关文章失败:', error);
+                relatedArticlesList.innerHTML = '<p>加载相关文章失败</p>';
+            }
+        }
+
+        // 显示相关文章
+        function displayRelatedArticles(articles) {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            if (!articles || articles.length === 0) {
+                relatedArticlesList.innerHTML = '<p>暂无相关文章</p>';
+                return;
+            }
+
+            // 最多显示20篇
+            const relatedArticles = articles.slice(0, 20);
+
+            // 清空当前列表
+            relatedArticlesList.innerHTML = '';
+
+            // 添加相关文章
+            relatedArticles.forEach(article => {
+                const relatedArticle = document.createElement('div');
+                relatedArticle.className = 'related-article';
+
+                // 构造文章显示内容
+                let articleHTML = '<a href="' + article.url + '">' + escapeHtml(article.title) + '</a>';
+                if (article.date) {
+                    articleHTML += '<span class="related-article-date">' + article.date + '</span>';
+                }
+
+                relatedArticle.innerHTML = articleHTML;
+                relatedArticlesList.appendChild(relatedArticle);
+            });
+        }
+
+        // 简单的HTML转义函数，防止XSS攻击
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>

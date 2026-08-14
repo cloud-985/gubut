@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    <title>智能合约是如何盗取你的资产 - 谷比算力</title>
+    <meta name="keywords" content="区块链策略开发, 量化交易策略, 数据采集, 行情数据接口, K线数据, 交易所API, 策略回测, Web3数据, 区块链数据分析, 自动化交易">
+    <meta name="description" content="我们专注于区块链与量化交易领域，提供策略开发、数据采集、行情接口与回测服务，助力用户高效获取链上与交易所数据，打造智能化交易与分析解决方案。">    
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="../styles.css">
+    <!-- 引入语言切换组件 -->
+    <script src="../lang.js"></script>
+        <!-- 自定义配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        dark: '#111827',
+                        light: '#F9FAFB'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 导航栏占位符 -->
+    <div id="navbar-placeholder"></div>
+
+    <div class="article-container">
+        <article class="article-content">
+            <h1>智能合约是如何盗取你的资产</h1>
+            <div class="article-meta">
+                <span data-lang="zh">发布于: </span><span data-lang="en" class="hidden-lang">Published: </span>2025/10/16 09:55:40
+            </div>
+            <div class="article-body">
+                <p dir="auto">恶意合约的实现通常涉及Solidity语言（针对以太坊等EVM兼容链），但由于这些合约旨在进行非法活动（如盗币），我将仅提供高层次概念性描述，而不包括任何可操作代码、具体步骤或示例脚本。这有助于理解安全风险，但请注意，实际编写或部署此类合约是非法的，可能导致严重法律后果。开发者应专注于防御性编程。</p>
+<p dir="auto"><img src="/img/file-1760579737831-847613855.png" alt="" width="1066" height="604"></p>
+<p dir="auto">以下针对之前提到的常见类型，进行抽象解释：</p>
+<h4 dir="auto">1. <strong>重入攻击（Reentrancy Attack）</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：设计一个攻击合约，包含一个fallback或receive函数，用于递归调用目标合约的提取函数。在目标合约执行外部转账时，攻击合约通过回调机制反复提取资金，直到目标合约资金耗尽。</li>
+<li><strong>关键概念</strong>：利用目标合约在转账后更新状态的顺序问题。攻击者需确保攻击合约能处理回调逻辑，但实际中需依赖目标合约的漏洞。</li>
+<li><strong>注意</strong>：现代Solidity版本（如0.8+）有内置检查，但历史漏洞仍需手动防范。</li>
+</ul>
+<h4 dir="auto">2. <strong>钓鱼合约（Phishing Contract）</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：创建一个伪装合约，模仿合法协议的接口（如ERC20的approve/transferFrom）。通过社交工程诱导用户调用授权函数，然后在后续交易中转移授权资产。</li>
+<li><strong>关键概念</strong>：依赖用户误操作授权无限额度。合约需实现标准接口，但添加隐藏的转移逻辑。</li>
+<li><strong>注意</strong>：这更依赖前端欺骗，而非纯合约代码。</li>
+</ul>
+<h4 dir="auto">3. <strong>溢出/下溢攻击（Integer Overflow/Underflow）</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：在合约中故意使用不安全的数学运算（如加法/减法），通过极端输入值（如最大uint）导致变量溢出到零或负值，从而操纵余额。</li>
+<li><strong>关键概念</strong>：针对旧Solidity版本，利用无符号整数的环绕行为。攻击者输入计算边界值来触发。</li>
+<li><strong>注意</strong>：新版本Solidity已自动抛出异常，使用SafeMath库可避免。</li>
+</ul>
+<h4 dir="auto">4. <strong>逻辑漏洞（Logic Flaws）</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：在合约设计中故意省略权限检查（如onlyOwner修饰符），允许任意调用者执行敏感操作（如转账或销毁）。</li>
+<li><strong>关键概念</strong>：通过不验证输入或调用者身份，创建后门。攻击者可直接调用暴露函数。</li>
+<li><strong>注意</strong>：这往往是开发者错误，但恶意时可有意引入。</li>
+</ul>
+<h4 dir="auto">5. <strong>假代币攻击（Fake Token Attack）</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：部署一个与合法代币同名的ERC20合约，但地址不同。在DEX上添加流动性，诱导用户交易时存入真资产换取假代币。</li>
+<li><strong>关键概念</strong>：利用用户不检查合约地址的疏忽。合约需实现标准代币接口，但无实际价值。</li>
+<li><strong>注意</strong>：依赖用户界面误导。</li>
+</ul>
+<h4 dir="auto">6. <strong>前端攻击结合恶意合约</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：合约本身简单，但结合篡改的DApp前端，引导用户签名恶意交易（如无限授权）。合约实现转移函数，等待前端触发。</li>
+<li><strong>关键概念</strong>：合约需与前端交互兼容，利用钱包签名机制。</li>
+<li><strong>注意</strong>：这更像是全栈攻击，合约仅是后端部分。</li>
+</ul>
+<h4 dir="auto">7. <strong>利用未验证的外部调用</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：部署一个假外部合约（如伪预言机），提供虚假数据给目标合约，导致其逻辑错误（如错误定价转移资金）。</li>
+<li><strong>关键概念</strong>：目标合约需依赖外部调用，攻击者替换地址或数据源。</li>
+<li><strong>注意</strong>：依赖目标合约的信任假设。</li>
+</ul>
+<h4 dir="auto">8. <strong>恶意空投（Airdrop Scams）</strong></h4>
+<ul dir="auto">
+<li><strong>高层次实现思路</strong>：合约实现空投函数，但隐藏授权或转移逻辑。用户调用领取时，触发恶意操作。</li>
+<li><strong>关键概念</strong>：使用事件日志伪装合法空投，诱导交互。</li>
+<li><strong>注意</strong>：依赖批量分发和社交传播。</li>
+</ul>
+<h3 dir="auto">通用实现注意事项（防御视角）</h3>
+<ul dir="auto">
+<li><strong>开发环境</strong>：使用Remix IDE或Hardhat/Truffle框架测试，但测试网（如Sepolia）用于模拟。</li>
+<li><strong>审计与测试</strong>：恶意合约易被检测，合法开发应进行第三方审计（如OpenZeppelin）。</li>
+<li><strong>法律风险</strong>：实现此类合约用于实际盗窃是非法的，建议仅用于教育或研究目的，如白帽黑客测试。</li>
+<li><strong>替代学习</strong>：若想学习Solidity，推荐从OpenZeppelin的开源库入手，构建安全合约而非恶意。</li>
+</ul>
+<p dir="auto">如果您的问题是关于如何防御这些攻击，或需要高层次的教育性讨论，请提供更多细节。我不会提供任何代码或详细指导，以避免误用。</p>
+            </div>
+
+            <div class="related-articles">
+                <h3>更多文章</h3>
+                <div id="related-articles-list">
+                <!-- 相关文章将通过JavaScript动态加载 -->
+                    <p>加载中...</p>
+                </div>
+                <div class="all-articles-link">
+                    <a href="../articles.html">查看所有文章 →</a>
+                </div>
+            </div>
+        </article>
+    </div>
+
+    <!-- 数据信号服务板块 -->
+    <section class="py-8 min-h-[20vh] flex items-center justify-center bg-gradient-to-br from-blue-900 via-blue-800 to-purple-700 text-white">
+        <div class="container mx-auto px-2 sm:px-6 lg:px-8 w-full">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4" data-lang-key="signals.title">
+                    数据信号服务
+                </h2>
+                <p class="text-blue-100 text-lg" data-lang-key="signals.subtitle">
+                    快人一步的行情数据，让你在别人还没反应时，就已经进场
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🔔</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.new.title">
+                        新币上线提醒
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.new.desc">
+                        第一时间获取新币上线信息，抢占先机
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">🚀</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.market.title">
+                        市场异动推送
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.market.desc">
+                        实时推送资金流异常、盘口深度变化等关键信号
+                    </p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 hover:border-blue-300/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/20 transform hover:-translate-y-1 max-w-sm w-full">
+                    <div class="w-16 h-16 mb-6 mx-auto flex items-center justify-center text-3xl">💎</div>
+                    <h3 class="text-xl font-bold mb-3 text-center" data-lang-key="signal.vip.title">
+                        VIP社群服务
+                    </h3>
+                    <p class="text-blue-100 text-center" data-lang-key="signal.vip.desc">
+                        加入专属社群，获取全部信号和深度指标
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-16 text-center">
+                <a href="https://t.me/mevjk_bot" class="inline-block bg-white hover:bg-blue-50 text-blue-900 font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg shadow-blue-400/20 hover:shadow-xl hover:shadow-blue-400/30 transform hover:-translate-y-1" target="_blank" data-lang-key="signal.btn">
+                    免费获取信号
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 悬浮社交按钮占位符 -->
+    <div id="social-floating-placeholder"></div>
+
+    <!-- 底部占位符 -->
+    <div id="footer-placeholder"></div>
+
+    <!-- 移动端底部导航栏占位符 -->
+    <div id="mobile-navbar-placeholder"></div>
+
+    <!-- 引入组件加载脚本 -->
+    <script src="../js/components.js"></script>
+
+    <script>
+        // 页面加载完成后获取相关文章
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRelatedArticles();
+        });
+
+        // 加载相关文章
+        async function loadRelatedArticles() {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            try {
+                // 从articles.json获取文章列表
+                const response = await fetch('../articles.json');
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+
+                const articles = await response.json();
+                
+                // 获取当前文章ID（从URL中提取）
+                const currentUrl = window.location.href;
+                const matchResult = currentUrl.match(/article-(\d+)\.html/);
+                const currentArticleId = matchResult ? matchResult[1] : null;
+
+                // 过滤掉当前文章，并准备显示数据
+                const relatedArticles = articles
+                    .filter(article => article.id != currentArticleId) // 使用 != 因为ID可能是字符串或数字
+                    .map(article => ({
+                        id: article.id,
+                        title: article.title,
+                        date: article.date || "",  // 如果没有日期字段则为空
+                        url: "../new/article-" + article.id + ".html"
+                    }));
+
+                // 按日期排序，最新的在前面
+                relatedArticles.sort((a, b) => {
+                    if (a.date && b.date) {
+                        // 如果都有日期，按日期排序
+                        return new Date(b.date) - new Date(a.date);
+                    } else if (a.date) {
+                        // 有日期的排在前面
+                        return -1;
+                    } else if (b.date) {
+                        // 有日期的排在前面
+                        return 1;
+                    } else {
+                        // 都没有日期，保持原有顺序
+                        return 0;
+                    }
+                });
+
+                displayRelatedArticles(relatedArticles);
+            } catch (error) {
+                console.error('加载相关文章失败:', error);
+                relatedArticlesList.innerHTML = '<p>加载相关文章失败</p>';
+            }
+        }
+
+        // 显示相关文章
+        function displayRelatedArticles(articles) {
+            const relatedArticlesList = document.getElementById('related-articles-list');
+
+            if (!articles || articles.length === 0) {
+                relatedArticlesList.innerHTML = '<p>暂无相关文章</p>';
+                return;
+            }
+
+            // 最多显示20篇
+            const relatedArticles = articles.slice(0, 20);
+
+            // 清空当前列表
+            relatedArticlesList.innerHTML = '';
+
+            // 添加相关文章
+            relatedArticles.forEach(article => {
+                const relatedArticle = document.createElement('div');
+                relatedArticle.className = 'related-article';
+
+                // 构造文章显示内容
+                let articleHTML = '<a href="' + article.url + '">' + escapeHtml(article.title) + '</a>';
+                if (article.date) {
+                    articleHTML += '<span class="related-article-date">' + article.date + '</span>';
+                }
+
+                relatedArticle.innerHTML = articleHTML;
+                relatedArticlesList.appendChild(relatedArticle);
+            });
+        }
+
+        // 简单的HTML转义函数，防止XSS攻击
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+    </script>
+</body>
+</html>
