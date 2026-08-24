@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -364,7 +364,7 @@
             }
             
             // 获取当前语言（默认为中文）
-            let currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            let currentLang = localStorage.getItem('preferredLanguage') || 'en';
             
             // 切换语言
             const newLang = currentLang === 'zh' ? 'en' : 'zh';
@@ -460,7 +460,7 @@
             }
             
             // 手动翻译所有带 data-lang-key 属性的元素
-            const currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            const currentLang = localStorage.getItem('preferredLanguage') || 'en';
             
             // 使用LanguageSwitcher类中定义的翻译映射
             const translations = langSwitcher.translations;
@@ -489,7 +489,7 @@
         // 翻译页面内容的函数
         function translatePageContent() {
             // 获取当前语言
-            const currentLang = localStorage.getItem('preferredLanguage') || 'zh';
+            const currentLang = localStorage.getItem('preferredLanguage') || 'en';
             
             // 执行页面内容翻译
             performTranslation(currentLang);

@@ -61,7 +61,7 @@ function generateArticlePage(article) {
     processedContent = processedContent.replace(/<img\s+src="img\//g, '<img src="/img/');
     
     const articleHtml = `<!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
