@@ -2,127 +2,325 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://www.gubut.com/index.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://www.gubut.com/strategy.html</loc>
-        <lastmod>2025-11-26</lastmod>
+        <loc>https://www.gubut.com/articles.html</loc>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>daily</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
+        <loc>https://www.gubut.com/new/article-1787966357373.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787965202107.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787878802025.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787792403186.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787706002545.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787620246530.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787619602663.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787565901555.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787533202725.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787446802641.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787360401890.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787274002838.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787187602510.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787101201553.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1787014801556.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786930027125.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786928402294.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786842002845.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786756658339.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786755601958.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786669201658.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786583454850.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786582802818.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786523000000.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786518800000.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786518705945.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786517177789.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786516925931.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1786516869752.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1775716873377.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1765981684499.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1764832336593.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>https://www.gubut.com/new/article-1763004225958.html</loc>
-        <lastmod>2025-11-13</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1761031478550.html</loc>
-        <lastmod>2025-10-21</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1760856831911.html</loc>
-        <lastmod>2025-10-19</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1760668387986.html</loc>
-        <lastmod>2025-10-17</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1760579740742.html</loc>
-        <lastmod>2025-10-16</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1760519156083.html</loc>
-        <lastmod>2025-10-15</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1760423351166.html</loc>
-        <lastmod>2025-10-14</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://www.gubut.com/new/article-1760064068549.html</loc>
-        <lastmod>2025-10-10</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1760061729854.html</loc>
-        <lastmod>2025-10-10</lastmod>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1760063501189.html</loc>
+        <lastmod>2026-08-29</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://www.gubut.com/new/article-1760064068549.html</loc>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1759981244112.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1759152480660.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1759060013494.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1759061331521.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1758966923255.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1758983536340.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1758850567983.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1758788737590.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1758789958440.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://www.gubut.com/new/article-1758724007922.html</loc>
-        <lastmod>2025-10-09</lastmod>
+        <lastmod>2026-08-29</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
